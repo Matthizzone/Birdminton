@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class shuttle : MonoBehaviour
 {
+    public GameObject star;
+
     float b = 2; // dissipation
     float g = 15; // gravity
 
     Vector3 r_0 = new Vector3(3, 0.5f, 0); // start point
+    Vector3 r_f = new Vector3(0, 0, 0); // end point
     Vector2 v_0 = new Vector3(1, 1); // start velocity
     Vector3 angle = new Vector3(1, 0, 0);
 
@@ -25,11 +28,14 @@ public class shuttle : MonoBehaviour
         Vector3 look_vector = transform.position - prev_loc;
         transform.LookAt(transform.position + look_vector);
         prev_loc = transform.position;
+
+        star.transform.GetChild(1).localScale = Vector3.one * 100 * Mathf.Exp(-get_height(Time.time - t_0) / 5);
     }
 
-    public void set_trajectory(Vector3 new_r_0, Vector3 r_f, float v_0_y)
+    public void set_trajectory(Vector3 new_r_0, Vector3 new_r_f, float v_0_y)
     {
         // clean r_f
+        r_f = new_r_f;
         r_f.y = 0;
 
         // update internal variables
@@ -57,6 +63,8 @@ public class shuttle : MonoBehaviour
 
         // initiate new flight
         t_0 = Time.time;
+
+        star.transform.position = r_f;
     }
 
     float get_radius(float t)
@@ -124,6 +132,11 @@ public class shuttle : MonoBehaviour
 
         if (net_dist >= v_0.x / b) return false; // the shuttle hits the floor before the net
 
-        return get_height(inv_radius(net_dist)) > 1.5;
+        return get_height(inv_radius(net_dist)) > 1.7f; // net is actually 1.5, but want some wiggle room
+    }
+
+    public Vector3 get_land_point()
+    {
+        return r_f;
     }
 }

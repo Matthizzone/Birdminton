@@ -9,15 +9,16 @@ public class Controls : MonoBehaviour
     Rigidbody rb;
 
     public GameObject birdie;
-    public GameObject star;
     public GameObject UI;
+    public GameObject audio_manager;
 
     Vector2 left_stick;
     Vector2 right_stick;
     Vector2 triggers;
 
     bool grounded = true;
-    bool swinging = false;
+    int a_pressed_ago = 0;
+    int b_pressed_ago = 0;
 
     public float temp1 = 0.2f;
     public float temp2 = 0.98f;
@@ -79,30 +80,18 @@ public class Controls : MonoBehaviour
         RaycastHit floor_point;
         grounded = Physics.Raycast(transform.position + Vector3.up * 0.05f, Vector3.down, out floor_point, 0.1f, layerMask);
 
-        if (Mathf.Abs(right_stick.x) + Mathf.Abs(right_stick.y) > 0.5)
-        {
-            if (!swinging)
-            {
-                // NEW SWING
-                swinging = true;
-                HitBirdie(right_stick);
-            }
-        }
-        else
-        {
-            swinging = false;
-        }
-
 
 
         // -------------------------------- do stuff ---------------------------------
 
         Vector3 flat_vel = rb.velocity;
+        flat_vel.y = 0;
+
         Vector3 leftstick_unit_length = new Vector2(left_stick.x, left_stick.y);
         if (leftstick_unit_length.magnitude > 1) leftstick_unit_length = leftstick_unit_length.normalized;
+
         if (grounded)
         {
-            flat_vel.y = 0;
             flat_vel += transform.right * leftstick_unit_length.x * 0.3f;
             flat_vel += transform.forward * leftstick_unit_length.y * 0.3f;
             flat_vel *= 0.91f;
@@ -115,22 +104,38 @@ public class Controls : MonoBehaviour
         }
         rb.velocity = new Vector3(flat_vel.x, rb.velocity.y, flat_vel.z);
 
-        star.transform.GetChild(1).localScale = Vector3.one * 100 / Mathf.Abs(0.75f - Vector3.Distance(transform.Find("Heart").position, birdie.transform.position));
+        if (a_pressed_ago > 0)
+        {
+            a_pressed_ago--;
+            if (a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 8);
+        }
+        if (b_pressed_ago > 0)
+        {
+            b_pressed_ago--;
+            if (b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15);
+        }
     }
 
     void A()
     {
-        //HitBirdie(new Vector2(triggers.x - triggers.y, -1));
-        birdie.GetComponent<shuttle>().set_trajectory(
-            transform.position + Vector3.up * 2.5f,
-            new Vector3(3, 0, 0),
-            temp1);
-        gameObject.GetComponent<AudioSource>().Play();
+        if (b_pressed_ago > 0)
+        {
+            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10);
+            b_pressed_ago = 0;
+        }
+        else
+            a_pressed_ago = 3;
     }
 
     void B()
     {
-        HitBirdie(new Vector2(triggers.x - triggers.y, 1));
+        if (a_pressed_ago > 0)
+        {
+            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10);
+            a_pressed_ago = 0;
+        }
+        else
+            b_pressed_ago = 3;
     }
 
     void X()
@@ -174,32 +179,7 @@ public class Controls : MonoBehaviour
 
     void RightStickPress()
     {
-        float quality = Vector3.Distance(transform.Find("Heart").position, birdie.transform.position);
-        if (Mathf.Abs(0.75f - quality) < 0.1f)
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect";
-        else if (Mathf.Abs(0.75f - quality) < 0.2f)
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "great!";
-        else if (Mathf.Abs(0.75f - quality) < 0.3f)
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "ok";
-        else
-        {
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss";
-            return;
-        }
-
-        Vector3 target_point = new Vector3(4, 0, 0);
-
-        star.transform.position = target_point;
-
-        Vector3 launch_angle = target_point - transform.position;
-        launch_angle.y = 0;
-        launch_angle = launch_angle.normalized;
-        launch_angle -= Vector3.up * 0.2f;
-        launch_angle = launch_angle.normalized;
-
-        birdie.GetComponent<Rigidbody>().velocity = launch_angle * 42;
-
-        gameObject.GetComponent<AudioSource>().Play();
+        print("right stick press");
     }
 
     void LB()
@@ -246,33 +226,14 @@ public class Controls : MonoBehaviour
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss";
             return;
         }
+    }
 
-        if (angle.x == 0) angle /= Mathf.Abs(angle.y);
-        else if (angle.y == 0) angle /= Mathf.Abs(angle.x);
-        else angle /= Mathf.Max(Mathf.Abs(angle.x), Mathf.Abs(angle.y));
+    void HitShuttle(Vector3 target_point, float v_y)
+    {
+        if (Vector3.Distance(transform.Find("Heart").position, birdie.transform.position) > 1.4f) return;
 
-        Vector3 target_point = new Vector3(
-            4 + angle.y * 3,
-            0,
-            angle.x * 3);
-
-        // calculate target point
-        //Vector3 target_point = new Vector3(
-        //    Mathf.Lerp(near_far_target.x, near_far_target.y, (angle.x + 1) / 2),
-        //    0,
-        //    Mathf.Lerp(side_target.x, side_target.y, (angle.z + 1) / 2)
-        //);
-
-        star.transform.position = target_point;
-
-        Vector3 launch_angle = target_point - transform.position;
-        launch_angle.y = 0;
-        launch_angle = launch_angle.normalized;
-        launch_angle += Vector3.up;
-        launch_angle = launch_angle.normalized;
-
-        birdie.GetComponent<Rigidbody>().velocity = launch_angle * 2 * Vector3.Distance(transform.position, target_point);
-
-        gameObject.GetComponent<AudioSource>().Play();
+        birdie.GetComponent<shuttle>().set_trajectory(birdie.transform.position, target_point, v_y);
+        audio_manager.GetComponent<audio_manager>().Play("C");
+        audio_manager.GetComponent<audio_manager>().Play("smash", 0.2f);
     }
 }
