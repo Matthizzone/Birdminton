@@ -11,17 +11,10 @@ public class IK : MonoBehaviour
     public GameObject target;
     public GameObject pole;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        start.transform.LookAt(target.transform.position, pole.transform.position - transform.position);
-        
+        start.transform.LookAt(target.transform.position, pole.transform.position - start.transform.position);
+
         float a = Vector3.Distance(upper.transform.position, lower.transform.position);
         float b = Vector3.Distance(lower.transform.position, end.transform.position);
         float c = Vector3.Distance(upper.transform.position, target.transform.position);

@@ -13,7 +13,11 @@ public class fps_setter : MonoBehaviour
     {
         string FPS = "" + 1 / Time.deltaTime;
         int decimal_index = FPS.IndexOf(".");
-        if (decimal_index > -1) FPS = FPS.Substring(0, decimal_index + 3);
+        try
+        {
+            FPS = FPS.Substring(0, decimal_index + 3);
+        }
+        catch {}
         gameObject.GetComponent<TMPro.TMP_Text>().text = FPS;
     }
 }

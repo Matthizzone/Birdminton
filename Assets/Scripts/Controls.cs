@@ -8,7 +8,9 @@ public class Controls : MonoBehaviour
     Input input;
     Rigidbody rb;
 
-    public GameObject birdie;
+    public GameObject shuttle;
+    public GameObject strings;
+    public Camera camera;
     public GameObject UI;
     public GameObject audio_manager;
 
@@ -22,6 +24,8 @@ public class Controls : MonoBehaviour
 
     public float temp1 = 0.2f;
     public float temp2 = 0.98f;
+
+    int shot_commit = -1;
 
     private void Awake()
     {
@@ -90,37 +94,45 @@ public class Controls : MonoBehaviour
         Vector3 leftstick_unit_length = new Vector2(left_stick.x, left_stick.y);
         if (leftstick_unit_length.magnitude > 1) leftstick_unit_length = leftstick_unit_length.normalized;
 
-        if (grounded)
+        float move_power = 0.3f;
+        float friction = 0.91f;
+
+        if (shot_commit > 0)
         {
-            flat_vel += transform.right * leftstick_unit_length.x * 0.3f;
-            flat_vel += transform.forward * leftstick_unit_length.y * 0.3f;
-            flat_vel *= 0.91f;
+            move_power = 0.05f;
         }
-        else
+        if (!grounded)
         {
-            flat_vel += transform.right * leftstick_unit_length.x * 0.05f;
-            flat_vel += transform.forward * leftstick_unit_length.y * 0.05f;
-            flat_vel *= 0.984f; // same terminal velocity
+            move_power = 0.05f;
+            friction = 0.984f;
         }
+
+        flat_vel += transform.right * leftstick_unit_length.x * move_power;
+        flat_vel += transform.forward * leftstick_unit_length.y * move_power;
+        flat_vel *= friction;
+
         rb.velocity = new Vector3(flat_vel.x, rb.velocity.y, flat_vel.z);
 
         if (a_pressed_ago > 0)
         {
             a_pressed_ago--;
-            if (a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 8);
+            if (a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 8); // drop
         }
         if (b_pressed_ago > 0)
         {
             b_pressed_ago--;
-            if (b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15);
+            if (b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15); // clear
         }
+
+        if (shot_commit >= 0)
+            shot_commit--;
     }
 
     void A()
     {
         if (b_pressed_ago > 0)
         {
-            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10);
+            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash
             b_pressed_ago = 0;
         }
         else
@@ -131,7 +143,7 @@ public class Controls : MonoBehaviour
     {
         if (a_pressed_ago > 0)
         {
-            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10);
+            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash
             a_pressed_ago = 0;
         }
         else
@@ -212,28 +224,42 @@ public class Controls : MonoBehaviour
         input.Gameplay.Disable();
     }
 
-    void HitBirdie(Vector2 angle)
+    void HitShuttle(Vector3 target_point, float v_y)
     {
-        float quality = Vector3.Distance(transform.Find("Heart").position, birdie.transform.position);
-        if (Mathf.Abs(0.75f - quality) < 0.1f)
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect";
-        else if (Mathf.Abs(0.75f - quality) < 0.3f)
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "great!";
-        else if (Mathf.Abs(0.75f - quality) < 0.5f)
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "ok";
-        else
+        if (shot_commit < 0) return;
+
+        Vector2 string_2d = camera.WorldToScreenPoint(strings.transform.position);
+        Vector2 shuttle_2d = camera.WorldToScreenPoint(shuttle.transform.position);
+        float quality = Vector3.Distance(string_2d, shuttle_2d); // closer to 0 is better
+        
+        if (quality > 200f)
         {
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss";
             return;
         }
+        else
+        {
+            // make contact
+            shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
+            shuttle.GetComponent<shuttle>().set_towards_player(false);
+            audio_manager.GetComponent<audio_manager>().Play("C");
+            audio_manager.GetComponent<audio_manager>().Play("smash", 0.2f);
+
+            if (quality < 80f) UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect!!";
+            else if (quality < 120f) UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "great!";
+            else if (quality < 200f) UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "ok";
+        }
+        
+
+            
     }
 
-    void HitShuttle(Vector3 target_point, float v_y)
+    public void set_shot_commit(int t)
     {
-        if (Vector3.Distance(transform.Find("Heart").position, birdie.transform.position) > 1.4f) return;
-
-        birdie.GetComponent<shuttle>().set_trajectory(birdie.transform.position, target_point, v_y);
-        audio_manager.GetComponent<audio_manager>().Play("C");
-        audio_manager.GetComponent<audio_manager>().Play("smash", 0.2f);
+        shot_commit = t;
+    }
+    public int get_shot_commit()
+    {
+        return shot_commit;
     }
 }

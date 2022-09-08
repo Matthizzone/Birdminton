@@ -10,18 +10,25 @@ public class penguin_anim : MonoBehaviour
     public float temp2 = 0;
 
     Rigidbody rb;
+    Animator anim;
+    string current_state;
 
     Vector3 prev_vel = Vector3.zero;
     Quaternion tilt = Quaternion.Euler(0, 90, 0);
 
+    Quaternion prev_head_rotation;
+
     private void Start()
     {
-        rb = transform.parent.GetComponent<Rigidbody>();
+        rb = transform.parent.parent.GetComponent<Rigidbody>();
+        anim = transform.GetComponent<Animator>();
+        prev_head_rotation = transform.Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head").transform.rotation;
     }
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         // -------------------------------------- ACCEL TILT -------------------------------------------
+
         float tilt_factor = 45;
         prev_vel.y = 0;
         tilt = Quaternion.Lerp(
@@ -30,17 +37,20 @@ public class penguin_anim : MonoBehaviour
             1 - Mathf.Exp(-10 * Time.deltaTime)
         );
 
-        transform.localRotation = tilt;
+        transform.parent.localRotation = tilt;
 
         prev_vel = rb.velocity;
 
+
+
         // -------------------------------------- HEAD AND EYES -------------------------------------------
-        Transform head = transform.Find("armature").Find("pelvis").Find("torso").Find("chest").Find("head");
+
+        Transform head = transform.Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head");
         Vector3 look_dir = shuttle.transform.position - head.position;
 
         // Apply angle limit
         look_dir = Vector3.RotateTowards(
-            transform.forward,
+            transform.right,
             look_dir,
             Mathf.Deg2Rad * 45, // Note we multiply by Mathf.Deg2Rad here to convert degrees to radians
             0
@@ -48,14 +58,52 @@ public class penguin_anim : MonoBehaviour
 
         // Apply damping
         head.rotation = Quaternion.Slerp(
-            head.rotation,
+            prev_head_rotation,
             Quaternion.LookRotation(look_dir, transform.up),
             1 - Mathf.Exp(-5 * Time.deltaTime)
         );
+        prev_head_rotation = head.transform.rotation;
 
         // eye time
         PointEye(head.Find("left_eye"));
         PointEye(head.Find("right_eye"));
+
+        
+
+        // --------------------------------------- ANIMATOR --------------------------------------------
+
+
+        anim.SetFloat("speed", rb.velocity.magnitude);
+        anim.SetFloat("x_speed", rb.velocity.x);
+
+        // grounded check
+        int layerMask = 0;
+        layerMask = ~layerMask; // every layer
+
+        RaycastHit floor_point;
+        bool grounded = Physics.Raycast(transform.parent.parent.position + Vector3.up * 0.05f, Vector3.down, out floor_point, 0.1f, layerMask);
+        anim.SetBool("grounded", grounded);
+
+
+
+        // ------------------------------------- SWING CHECKS ------------------------------------------
+
+        if (shuttle.GetComponent<shuttle>().get_towards_player())
+        {
+            Transform hitbox;
+            Vector3 future_hitbox_loc;
+            float t_add = 0.3f;
+
+            hitbox = transform.parent.parent.Find("hitbox_forehand");
+            future_hitbox_loc = hitbox.position + rb.velocity * t_add;
+            if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f
+                && !(transform.parent.parent.GetComponent<Controls>().get_shot_commit() > 0))
+            {
+                // swing commit
+                transform.parent.parent.GetComponent<Controls>().set_shot_commit(60);
+                anim.SetTrigger("forehand");
+            }
+        }
 
     }
 

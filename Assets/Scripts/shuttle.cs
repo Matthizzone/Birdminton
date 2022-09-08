@@ -18,18 +18,25 @@ public class shuttle : MonoBehaviour
 
     Vector3 prev_loc = Vector3.zero; // store location from last from for lookat
 
+    bool towards_player = true;
+
     // Update is called once per frame
     void Update()
     {
         // plug in t
-        Vector3 floor_r_0 = new Vector3(r_0.x, 0, r_0.z);
-        transform.position = floor_r_0 + angle * get_radius(Time.time - t_0) + Vector3.up * get_height(Time.time - t_0);
+        transform.position = get_pos(Time.time);
 
         Vector3 look_vector = transform.position - prev_loc;
         transform.LookAt(transform.position + look_vector);
         prev_loc = transform.position;
 
         star.transform.GetChild(1).localScale = Vector3.one * 100 * Mathf.Exp(-get_height(Time.time - t_0) / 5);
+    }
+
+    public Vector3 get_pos(float t)
+    {
+        Vector3 floor_r_0 = new Vector3(r_0.x, 0, r_0.z);
+        return floor_r_0 + angle * get_radius(t - t_0) + Vector3.up * get_height(t - t_0);
     }
 
     public void set_trajectory(Vector3 new_r_0, Vector3 new_r_f, float v_0_y)
@@ -41,12 +48,14 @@ public class shuttle : MonoBehaviour
         // update internal variables
         r_0 = new_r_0;
         v_0 = new Vector3(32, v_0_y);
+        transform.position = r_0;
 
         Vector3 floor_r_0 = new Vector3(r_0.x, 0, r_0.z);
         float goal_radius = Vector3.Distance(floor_r_0, r_f);
         angle = (r_f - floor_r_0).normalized;
 
         // adjust v0 until the landing point is hit precisely
+        int attempts = 10000;
         while (true)
         {
             float adj = Mathf.Pow(2, 10);
@@ -58,6 +67,8 @@ public class shuttle : MonoBehaviour
             }
             if (r_f.x * r_0.x > 0) break; // player and target loc are on same side of net, skip net check
             if (clearing_net()) break;
+            if (attempts <= 0) break; // if you can't clear the net, so be it
+            attempts--;
             v_0.y += 0.1f;
         }
 
@@ -138,5 +149,16 @@ public class shuttle : MonoBehaviour
     public Vector3 get_land_point()
     {
         return r_f;
+    }
+
+
+
+    public void set_towards_player(bool new_towards_player)
+    {
+        towards_player = new_towards_player;
+    }
+    public bool get_towards_player()
+    {
+        return towards_player;
     }
 }
