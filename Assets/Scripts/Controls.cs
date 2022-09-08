@@ -27,6 +27,7 @@ public class Controls : MonoBehaviour
 
     int shot_commit = -1;
 
+
     private void Awake()
     {
         input = new Input();

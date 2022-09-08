@@ -74,7 +74,6 @@ public class penguin_anim : MonoBehaviour
 
 
         anim.SetFloat("speed", rb.velocity.magnitude);
-        anim.SetFloat("x_speed", rb.velocity.x);
 
         // grounded check
         int layerMask = 0;
@@ -90,18 +89,24 @@ public class penguin_anim : MonoBehaviour
 
         if (shuttle.GetComponent<shuttle>().get_towards_player())
         {
-            Transform hitbox;
-            Vector3 future_hitbox_loc;
-            float t_add = 0.3f;
+            Transform[] hitbox = new Transform[4];
+            hitbox[0] = transform.parent.parent.Find("hitbox_forehand");
+            hitbox[1] = transform.parent.parent.Find("hitbox_backhand");
+            hitbox[2] = transform.parent.parent.Find("hitbox_clear");
+            hitbox[3] = transform.parent.parent.Find("hitbox_lift");
+            float t_add = 0.5f;
 
-            hitbox = transform.parent.parent.Find("hitbox_forehand");
-            future_hitbox_loc = hitbox.position + rb.velocity * t_add;
-            if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f
-                && !(transform.parent.parent.GetComponent<Controls>().get_shot_commit() > 0))
+            for (int i = 0; i < 4; i++)
             {
-                // swing commit
-                transform.parent.parent.GetComponent<Controls>().set_shot_commit(60);
-                anim.SetTrigger("forehand");
+                Vector3 future_hitbox_loc = hitbox[i].position + rb.velocity * t_add / 3;
+                if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f
+                    && !(transform.parent.parent.GetComponent<Controls>().get_shot_commit() > 0))
+                {
+                    // swing commit
+                    transform.parent.parent.GetComponent<Controls>().set_shot_commit(60);
+                    anim.SetTrigger("swing");
+                    anim.SetInteger("shot_type", i);
+                }
             }
         }
 
