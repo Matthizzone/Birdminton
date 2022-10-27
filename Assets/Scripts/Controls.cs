@@ -7,6 +7,7 @@ public class Controls : MonoBehaviour
 {
     Input input;
     Rigidbody rb;
+    Animator anim;
 
     public GameObject shuttle;
     public GameObject strings;
@@ -14,23 +15,26 @@ public class Controls : MonoBehaviour
     public GameObject UI;
     public GameObject audio_manager;
 
+    public float temp1 = 0.2f;
+    public float temp2 = 0.98f;
+
     Vector2 left_stick;
     Vector2 right_stick;
     Vector2 triggers;
 
     bool grounded = true;
-    bool charging = false;
+    int swing_commit = -1;
+    int swing_commit_type = 0;
+    int max_swing_commit = 50; // character param
     int a_pressed_ago = 0;
     int b_pressed_ago = 0;
-
-    public float temp1 = 0.2f;
-    public float temp2 = 0.98f;
 
 
     private void Awake()
     {
         input = new Input();
         rb = GetComponent<Rigidbody>();
+        anim = transform.Find("penguin_tilt").Find("penguin_model").GetComponent<Animator>();
 
         input.Gameplay.A.performed += ctx => A();
         input.Gameplay.B.performed += ctx => B();
@@ -75,7 +79,7 @@ public class Controls : MonoBehaviour
 
     private void Update()
     {
-        // ------------------------------ gather info -------------------------------------
+        // ------------------------------ GROUND CHECK -------------------------------------
 
         // grounded check
         int layerMask = 0;
@@ -86,7 +90,7 @@ public class Controls : MonoBehaviour
 
 
 
-        // -------------------------------- do stuff ---------------------------------
+        // -------------------------------- MOVEMENT ---------------------------------
 
         Vector3 flat_vel = rb.velocity;
         flat_vel.y = 0;
@@ -109,6 +113,8 @@ public class Controls : MonoBehaviour
 
         rb.velocity = new Vector3(flat_vel.x, rb.velocity.y, flat_vel.z);
 
+        // -------------------------------- SWINGING ---------------------------------
+
         if (a_pressed_ago > 0)
         {
             a_pressed_ago--;
@@ -119,6 +125,41 @@ public class Controls : MonoBehaviour
             b_pressed_ago--;
             if (b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15, 100); // clear
         }
+
+
+        // -------------------------------- SWING COMMITMENT ---------------------------------
+
+        if (shuttle.GetComponent<shuttle>().get_towards_player())
+        {
+            Transform hitbox = transform.Find("hitbox");
+            float t_add = 0.2f;
+
+            Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
+            Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add);
+            //if (Vector3.Distance(shuttle.transform.position, hitbox.position) < 3f)
+            if (Vector3.Distance(future_shuttle_loc, future_hitbox_loc) < 1.5f &&
+                shuttle.GetComponent<shuttle>().get_towards_player())
+            {
+                // swing commit
+                if (swing_commit < 0)
+                {
+                    swing_commit = max_swing_commit;
+                    if (future_shuttle_loc.y > future_hitbox_loc.y + temp1)
+                        swing_commit_type = 2;
+                    else
+                    {
+                        if (rb.velocity.z < 0)
+                            swing_commit_type = 0;
+                        else
+                            swing_commit_type = 1;
+                    }
+                    anim.SetInteger("shot_type", swing_commit_type);
+                    anim.SetTrigger("swing");
+                }
+            }
+        }
+
+        if (swing_commit > -1) swing_commit--;
     }
 
     void A()
@@ -224,7 +265,8 @@ public class Controls : MonoBehaviour
         {
             shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
             shuttle.GetComponent<shuttle>().set_towards_player(false);
-            audio_manager.GetComponent<audio_manager>().Play("hit medium", 0.2f);
+            if (v_y < 0) audio_manager.GetComponent<audio_manager>().Play("hit hard", 1);
+            else audio_manager.GetComponent<audio_manager>().Play("hit medium", 1);
 
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect!!";
         }
@@ -233,5 +275,15 @@ public class Controls : MonoBehaviour
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss...";
             audio_manager.GetComponent<audio_manager>().Play("woosh");
         }
+    }
+
+    public int get_swing_commit()
+    {
+        return swing_commit;
+    }
+
+    public int get_swing_commit_type()
+    {
+        return swing_commit_type;
     }
 }

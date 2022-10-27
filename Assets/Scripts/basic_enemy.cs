@@ -86,6 +86,6 @@ public class basic_enemy : MonoBehaviour
             shuttle.transform.position,
             new Vector3(Random.Range(-6f, -2f), 0, Random.Range(-3f, 3f)),
             15);
-        audio_manager.GetComponent<audio_manager>().Play("hit soft");
+        audio_manager.GetComponent<audio_manager>().Play("hit soft", 1);
     }
 }

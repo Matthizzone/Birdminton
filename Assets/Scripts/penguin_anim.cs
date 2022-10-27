@@ -11,7 +11,7 @@ public class penguin_anim : MonoBehaviour
 
     Rigidbody rb;
     Animator anim;
-    string current_state;
+    bool swing_commit = false;
 
     Vector3 prev_vel = Vector3.zero;
     Quaternion tilt = Quaternion.Euler(0, 90, 0);
@@ -27,6 +27,23 @@ public class penguin_anim : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
+        // --------------------------------------- TURNING ---------------------------------------------
+
+        Vector3 target_angle = Vector3.forward * (transform.parent.parent.GetComponent<Controls>().get_swing_commit_type() == 0 ? 1 : -1);
+        if (transform.parent.parent.GetComponent<Controls>().get_swing_commit() < 0) target_angle = -rb.velocity;
+
+        target_angle = Vector3.RotateTowards(transform.forward, target_angle, 0.2f, 0);
+        target_angle.y = 0;
+
+        /* more relaxed angle when not your turn
+        if (!shuttle.GetComponent<shuttle>().get_towards_player())
+        {
+            float angle = Vector3.Angle(Vector3.right, target_angle) * Mathf.Sign(Vector3.Dot(Vector3.forward, target_angle));
+            target_angle *= angle <= 180 && angle > 45 ? 1 : -1;
+        } */
+
+        transform.LookAt(transform.position + target_angle);
+
         // -------------------------------------- ACCEL TILT -------------------------------------------
 
         float tilt_factor = 45;
@@ -40,8 +57,6 @@ public class penguin_anim : MonoBehaviour
         transform.parent.localRotation = tilt;
 
         prev_vel = rb.velocity;
-
-
 
         // -------------------------------------- HEAD AND EYES -------------------------------------------
 
@@ -90,15 +105,21 @@ public class penguin_anim : MonoBehaviour
         if (shuttle.GetComponent<shuttle>().get_towards_player())
         {
             Transform hitbox = transform.parent.parent.Find("hitbox");
-            //float t_add = 0.5f;
+            float t_add = 0.3f;
 
-            //Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
-            //if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f)
-            if (Vector3.Distance(shuttle.transform.position, hitbox.position) < 3f)
-                {
+            Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
+            //if (Vector3.Distance(shuttle.transform.position, hitbox.position) < 3f)
+            if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f &&
+                shuttle.GetComponent<shuttle>().get_towards_player())
+            {
                 // swing commit
-                anim.SetTrigger("swing");
-                anim.SetInteger("shot_type", 0);
+                if (!swing_commit)
+                {
+                    swing_commit = true;
+                    anim.SetTrigger("swing");
+                    print("sure pal");
+                    anim.SetInteger("shot_type", 0);
+                }
             }
         }
 

@@ -1036,7 +1036,7 @@ MonoBehaviour:
   camera: {fileID: 766054324}
   UI: {fileID: 1723439659}
   audio_manager: {fileID: 1536493449}
-  temp1: -50
+  temp1: 100
   temp2: 5
 --- !u!136 &641765906
 CapsuleCollider:
@@ -1070,7 +1070,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &662331628
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1163,12 +1163,12 @@ GameObject:
   m_Component:
   - component: {fileID: 704114302}
   m_Layer: 0
-  m_Name: penguin
+  m_Name: penguin_tilt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &704114302
 Transform:
   m_ObjectHideFlags: 0
@@ -3810,7 +3810,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Color: {r: 0.99215686, g: 0.9843137, b: 0.8666667, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
@@ -4909,8 +4909,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6489139248850079003}
   - component: {fileID: 6489139248850079005}
+  - component: {fileID: 6489139248850079006}
   m_Layer: 0
-  m_Name: penguin-full-anim-corr-origin
+  m_Name: penguin_model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4985,6 +4986,21 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &6489139248850079006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5856330331550996385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1ac56fff10586f4fa230babd3ab7e93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shuttle: {fileID: 1499529926}
+  temp1: 90
+  temp2: 0
 --- !u!1 &7103192299832922987
 GameObject:
   m_ObjectHideFlags: 0
