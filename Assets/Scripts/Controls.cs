@@ -19,6 +19,7 @@ public class Controls : MonoBehaviour
     Vector2 triggers;
 
     bool grounded = true;
+    bool charging = false;
     int a_pressed_ago = 0;
     int b_pressed_ago = 0;
 
@@ -223,14 +224,14 @@ public class Controls : MonoBehaviour
         {
             shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
             shuttle.GetComponent<shuttle>().set_towards_player(false);
-            audio_manager.GetComponent<audio_manager>().Play("C");
-            audio_manager.GetComponent<audio_manager>().Play("smash", 0.2f);
+            audio_manager.GetComponent<audio_manager>().Play("hit medium", 0.2f);
 
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect!!";
         }
         else
         {
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss...";
+            audio_manager.GetComponent<audio_manager>().Play("woosh");
         }
     }
 }
