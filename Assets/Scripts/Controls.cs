@@ -25,8 +25,6 @@ public class Controls : MonoBehaviour
     public float temp1 = 0.2f;
     public float temp2 = 0.98f;
 
-    int shot_commit = -1;
-
 
     private void Awake()
     {
@@ -98,10 +96,6 @@ public class Controls : MonoBehaviour
         float move_power = 0.3f;
         float friction = 0.91f;
 
-        if (shot_commit > 0)
-        {
-            move_power = 0.05f;
-        }
         if (!grounded)
         {
             move_power = 0.05f;
@@ -117,23 +111,20 @@ public class Controls : MonoBehaviour
         if (a_pressed_ago > 0)
         {
             a_pressed_ago--;
-            if (a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 8); // drop
+            if (a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 5, 100); // drop
         }
         if (b_pressed_ago > 0)
         {
             b_pressed_ago--;
-            if (b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15); // clear
+            if (b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15, 100); // clear
         }
-
-        if (shot_commit >= 0)
-            shot_commit--;
     }
 
     void A()
     {
         if (b_pressed_ago > 0)
         {
-            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash
+            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
             b_pressed_ago = 0;
         }
         else
@@ -144,7 +135,7 @@ public class Controls : MonoBehaviour
     {
         if (a_pressed_ago > 0)
         {
-            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash
+            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
             a_pressed_ago = 0;
         }
         else
@@ -225,42 +216,21 @@ public class Controls : MonoBehaviour
         input.Gameplay.Disable();
     }
 
-    void HitShuttle(Vector3 target_point, float v_y)
+    void HitShuttle(Vector3 target_point, float v_y, float quality)
     {
-        if (shot_commit < 0) return;
-
-        Vector2 string_2d = camera.WorldToScreenPoint(strings.transform.position);
-        Vector2 shuttle_2d = camera.WorldToScreenPoint(shuttle.transform.position);
-        float quality = Vector3.Distance(string_2d, shuttle_2d); // closer to 0 is better
-        
-        if (quality > 200f)
+        if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
+            && shuttle.GetComponent<shuttle>().get_towards_player())
         {
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss";
-            return;
-        }
-        else
-        {
-            // make contact
             shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
             shuttle.GetComponent<shuttle>().set_towards_player(false);
             audio_manager.GetComponent<audio_manager>().Play("C");
             audio_manager.GetComponent<audio_manager>().Play("smash", 0.2f);
 
-            if (quality < 80f) UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect!!";
-            else if (quality < 120f) UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "great!";
-            else if (quality < 200f) UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "ok";
+            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect!!";
         }
-        
-
-            
-    }
-
-    public void set_shot_commit(int t)
-    {
-        shot_commit = t;
-    }
-    public int get_shot_commit()
-    {
-        return shot_commit;
+        else
+        {
+            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss...";
+        }
     }
 }

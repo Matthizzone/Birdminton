@@ -89,24 +89,16 @@ public class penguin_anim : MonoBehaviour
 
         if (shuttle.GetComponent<shuttle>().get_towards_player())
         {
-            Transform[] hitbox = new Transform[4];
-            hitbox[0] = transform.parent.parent.Find("hitbox_forehand");
-            hitbox[1] = transform.parent.parent.Find("hitbox_backhand");
-            hitbox[2] = transform.parent.parent.Find("hitbox_clear");
-            hitbox[3] = transform.parent.parent.Find("hitbox_lift");
-            float t_add = 0.5f;
+            Transform hitbox = transform.parent.parent.Find("hitbox");
+            //float t_add = 0.5f;
 
-            for (int i = 0; i < 4; i++)
-            {
-                Vector3 future_hitbox_loc = hitbox[i].position + rb.velocity * t_add / 3;
-                if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f
-                    && !(transform.parent.parent.GetComponent<Controls>().get_shot_commit() > 0))
+            //Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
+            //if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f)
+            if (Vector3.Distance(shuttle.transform.position, hitbox.position) < 3f)
                 {
-                    // swing commit
-                    transform.parent.parent.GetComponent<Controls>().set_shot_commit(60);
-                    anim.SetTrigger("swing");
-                    anim.SetInteger("shot_type", i);
-                }
+                // swing commit
+                anim.SetTrigger("swing");
+                anim.SetInteger("shot_type", 0);
             }
         }
 
