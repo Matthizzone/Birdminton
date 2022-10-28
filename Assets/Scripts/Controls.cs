@@ -86,7 +86,12 @@ public class Controls : MonoBehaviour
         layerMask = ~layerMask; // every layer
 
         RaycastHit floor_point;
-        grounded = Physics.Raycast(transform.position + Vector3.up * 0.05f, Vector3.down, out floor_point, 0.1f, layerMask);
+        bool new_grounded = Physics.Raycast(transform.position + Vector3.up * 0.05f, Vector3.down, out floor_point, 0.1f, layerMask);
+        if (grounded && !new_grounded)
+        {
+            anim.SetTrigger("land");
+        }
+        grounded = new_grounded;
 
 
 
@@ -144,17 +149,26 @@ public class Controls : MonoBehaviour
                 if (swing_commit < 0)
                 {
                     swing_commit = max_swing_commit;
-                    if (future_shuttle_loc.y > future_hitbox_loc.y + temp1)
-                        swing_commit_type = 2;
+                    audio_manager.GetComponent<audio_manager>().Play("woosh");
+                    if (grounded)
+                    {
+                        if (future_shuttle_loc.y > future_hitbox_loc.y + 1.16f)
+                            swing_commit_type = 2;
+                        else
+                        {
+                            if (rb.velocity.z < 0)
+                                swing_commit_type = 0;
+                            else
+                                swing_commit_type = 1;
+                        }
+                        anim.SetInteger("shot_type", swing_commit_type);
+                        anim.SetTrigger("swing");
+                    }
                     else
                     {
-                        if (rb.velocity.z < 0)
-                            swing_commit_type = 0;
-                        else
-                            swing_commit_type = 1;
+                        anim.SetTrigger("smash");
+                        swing_commit_type = 4;
                     }
-                    anim.SetInteger("shot_type", swing_commit_type);
-                    anim.SetTrigger("swing");
                 }
             }
         }
@@ -195,6 +209,7 @@ public class Controls : MonoBehaviour
         {
             rb.velocity *= 0.5f;
             rb.velocity = new Vector3(rb.velocity.x, 4f, rb.velocity.z);
+            anim.SetTrigger("jump");
         }
     }
 
@@ -263,6 +278,12 @@ public class Controls : MonoBehaviour
         if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
             && shuttle.GetComponent<shuttle>().get_towards_player())
         {
+            if (swing_commit < 0)
+            {
+                anim.SetInteger("shot_type", 3);
+                anim.SetTrigger("swing");
+                swing_commit = 20;
+            }
             shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
             shuttle.GetComponent<shuttle>().set_towards_player(false);
             if (v_y < 0) audio_manager.GetComponent<audio_manager>().Play("hit hard", 1);
@@ -273,7 +294,6 @@ public class Controls : MonoBehaviour
         else
         {
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss...";
-            audio_manager.GetComponent<audio_manager>().Play("woosh");
         }
     }
 

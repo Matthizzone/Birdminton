@@ -28,8 +28,8 @@ public class penguin_anim : MonoBehaviour
     void LateUpdate()
     {
         // --------------------------------------- TURNING ---------------------------------------------
-
-        Vector3 target_angle = Vector3.forward * (transform.parent.parent.GetComponent<Controls>().get_swing_commit_type() == 0 ? 1 : -1);
+        int shot_type = transform.parent.parent.GetComponent<Controls>().get_swing_commit_type();
+        Vector3 target_angle = Vector3.forward * (shot_type == 1 ? -1 : 1);
         if (transform.parent.parent.GetComponent<Controls>().get_swing_commit() < 0) target_angle = -rb.velocity;
 
         target_angle = Vector3.RotateTowards(transform.forward, target_angle, 0.2f, 0);
@@ -89,39 +89,6 @@ public class penguin_anim : MonoBehaviour
 
 
         anim.SetFloat("speed", rb.velocity.magnitude);
-
-        // grounded check
-        int layerMask = 0;
-        layerMask = ~layerMask; // every layer
-
-        RaycastHit floor_point;
-        bool grounded = Physics.Raycast(transform.parent.parent.position + Vector3.up * 0.05f, Vector3.down, out floor_point, 0.1f, layerMask);
-        anim.SetBool("grounded", grounded);
-
-
-
-        // ------------------------------------- SWING CHECKS ------------------------------------------
-
-        if (shuttle.GetComponent<shuttle>().get_towards_player())
-        {
-            Transform hitbox = transform.parent.parent.Find("hitbox");
-            float t_add = 0.3f;
-
-            Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
-            //if (Vector3.Distance(shuttle.transform.position, hitbox.position) < 3f)
-            if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add), future_hitbox_loc) < 1.5f &&
-                shuttle.GetComponent<shuttle>().get_towards_player())
-            {
-                // swing commit
-                if (!swing_commit)
-                {
-                    swing_commit = true;
-                    anim.SetTrigger("swing");
-                    print("sure pal");
-                    anim.SetInteger("shot_type", 0);
-                }
-            }
-        }
 
     }
 
