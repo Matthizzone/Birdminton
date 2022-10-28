@@ -6,11 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Court.unity
-    guid: f0092921b5821f9469e39ab913ff3a29
-  - enabled: 1
     path: Assets/Scenes/Story Cards.unity
     guid: 06a3d2d5f7c0d7d46accb49b08803ce7
+  - enabled: 1
+    path: Assets/Scenes/Court.unity
+    guid: f0092921b5821f9469e39ab913ff3a29
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 0b752d3e981ab89459a91eb74f6a2e57, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 6cd51f977a5aa844f94f140ce6bfc454, type: 2}
