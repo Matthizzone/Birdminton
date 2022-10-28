@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class text_nav : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class text_nav : MonoBehaviour
     Vector2 triggers;
 
     string[] phrases = { "Two penguin boys are best friends.",
-                      "They are in their first year of high school, they are excited to try out for the basketball team.",
+                      "They are in their first year of high school, and they are excited to try out for the basketball team.",
                       "At tryouts, they are bested quickly by older students.",
                       "Bummed, they walk defeated back toward their lockers to change.",
                       "In the auxiliary gym, they see penguins playing a different sport.",
@@ -28,6 +29,7 @@ public class text_nav : MonoBehaviour
     int phrase_i = 0;
 
     bool transition = true;
+    bool advance = false;
     int fadeout = 0;
     int wait = 50;
     int fadein = 50;
@@ -100,13 +102,17 @@ public class text_nav : MonoBehaviour
 
     void A()
     {
-        if (phrase_i < phrases.Length && !transition)
+        if (advance)
+        {
+            SceneManager.LoadScene("Court", LoadSceneMode.Single);
+        }
+        if (!transition)
         {
             phrase_i++;
             character = 0;
             transition = true;
             fadeout = 50;
-            wait = 50;
+            wait = phrase_i == 9 ? 240 : 50;
             fadein = 50;
             audio_manager.GetComponent<audio_manager>().Stop("text");
         }
@@ -127,6 +133,14 @@ public class text_nav : MonoBehaviour
         if (wait > 0)
         {
             wait--;
+            return;
+        }
+        if (phrase_i == 9)
+        {
+            transform.parent.Find("logo").GetComponent<RawImage>().color = new Color(1, 1, 1);
+            audio_manager.GetComponent<audio_manager>().Play("logo");
+            transition = false;
+            advance = true;
             return;
         }
         transform.parent.Find("RawImage").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Sprites/intro" + (phrase_i + 1));
