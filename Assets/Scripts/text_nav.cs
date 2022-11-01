@@ -9,7 +9,7 @@ public class text_nav : MonoBehaviour
 {
     Input input;
 
-    public GameObject audio_manager;
+    GameObject audio_manager;
 
     Vector2 left_stick;
     Vector2 right_stick;
@@ -33,10 +33,12 @@ public class text_nav : MonoBehaviour
     int fadeout = 0;
     int wait = 50;
     int fadein = 50;
+    int advance_count = 500;
 
     private void Awake()
     {
         input = new Input();
+        audio_manager = GameObject.Find("audio_manager");
 
         input.Gameplay.A.performed += ctx => A();
         input.Gameplay.B.performed += ctx => B();
@@ -81,30 +83,42 @@ public class text_nav : MonoBehaviour
 
     private void Update()
     {
-        if (transition)
+        if (advance_count < 400)
         {
-            handle_transition();
+            handle_scene_change();
         }
-        else {
-            if (character < 0.1f)
-                audio_manager.GetComponent<audio_manager>().Play("text");
-            else if (character >= phrases[phrase_i].Length)
-                audio_manager.GetComponent<audio_manager>().Stop("text");
-
-            if (character < phrases[phrase_i].Length)
+        else
+        {
+            if (transition)
             {
-                character += character_speed;
+                handle_transition();
             }
+            else
+            {
+                if (character < 0.1f)
+                    audio_manager.GetComponent<audio_manager>().Play("text");
+                else if (character >= phrases[phrase_i].Length)
+                    audio_manager.GetComponent<audio_manager>().Stop("text");
 
-            GetComponent<TMPro.TMP_Text>().text = phrases[phrase_i].Substring(0, Mathf.RoundToInt(character));
+                if (phrase_i < phrases.Length)
+                {
+                    if (character < phrases[phrase_i].Length)
+                    {
+                        character += character_speed;
+                    }
+
+                    GetComponent<TMPro.TMP_Text>().text = phrases[phrase_i].Substring(0, Mathf.RoundToInt(character));
+                }
+            }
         }
     }
 
     void A()
     {
-        if (advance)
+        if (advance && advance_count > 400)
         {
-            SceneManager.LoadScene("Court", LoadSceneMode.Single);
+            advance_count = 360;
+            DontDestroyOnLoad(transform.parent.gameObject);
         }
         if (!transition)
         {
@@ -112,7 +126,8 @@ public class text_nav : MonoBehaviour
             character = 0;
             transition = true;
             fadeout = 50;
-            wait = phrase_i == 9 ? 240 : 50;
+            wait = phrase_i == 9 ? 150 : 50;
+            if (phrase_i == 9) audio_manager.GetComponent<audio_manager>().Play("logo_new");
             fadein = 50;
             audio_manager.GetComponent<audio_manager>().Stop("text");
         }
@@ -138,7 +153,6 @@ public class text_nav : MonoBehaviour
         if (phrase_i == 9)
         {
             transform.parent.Find("logo").GetComponent<RawImage>().color = new Color(1, 1, 1);
-            audio_manager.GetComponent<audio_manager>().Play("logo");
             transition = false;
             advance = true;
             return;
@@ -151,6 +165,7 @@ public class text_nav : MonoBehaviour
         {
             transform.localPosition = new Vector3(453, -32, 0);
             transition = false;
+            transform.parent.Find("RawImage").position = new Vector3(100000, 100000, 100000); // throw off screen
             return;
         }
 
@@ -163,6 +178,22 @@ public class text_nav : MonoBehaviour
         }
         transform.parent.Find("RawImage").GetComponent<RawImage>().color = new Color(1, 1, 1);
         transition = false;
+    }
+
+    void handle_scene_change()
+    {
+        transform.parent.Find("curtain").GetComponent<Image>().color = new Color(0, 0, 0, Mathf.Min(1.5f - Mathf.Abs(180 - advance_count) / 120f, 1));
+        advance_count--;
+        print(advance_count);
+        if (advance_count == 180)
+        {
+            SceneManager.LoadScene("Court", LoadSceneMode.Single);
+            transform.parent.Find("RawImage").position = new Vector3(10000, 10000, 10000);
+            transform.parent.Find("logo").position = new Vector3(10000, 10000, 10000);
+            transform.parent.Find("RawImage").position = new Vector3(10000, 10000, 10000);
+            audio_manager.GetComponent<audio_manager>().Play("court_intro");
+        }
+        if (advance_count == 0) Destroy(transform.parent.gameObject);
     }
 
     void B()
@@ -222,7 +253,7 @@ public class text_nav : MonoBehaviour
 
     void Start_down()
     {
-        print("Start down");
+        phrase_i = 8;
     }
 
     void Select()

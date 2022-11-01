@@ -13,10 +13,10 @@ public class Controls : MonoBehaviour
     public GameObject strings;
     public Camera camera;
     public GameObject UI;
-    public GameObject audio_manager;
+    GameObject audio_manager;
 
-    public float temp1 = 0.2f;
-    public float temp2 = 0.98f;
+    public float temp1 = 8;
+    public int temp2 = 80;
 
     Vector2 left_stick;
     Vector2 right_stick;
@@ -28,6 +28,7 @@ public class Controls : MonoBehaviour
     int max_swing_commit = 50; // character param
     int a_pressed_ago = 0;
     int b_pressed_ago = 0;
+    bool mishit = false;
 
 
     private void Awake()
@@ -35,6 +36,7 @@ public class Controls : MonoBehaviour
         input = new Input();
         rb = GetComponent<Rigidbody>();
         anim = transform.Find("penguin_tilt").Find("penguin_model").GetComponent<Animator>();
+        audio_manager = GameObject.Find("audio_manager");
 
         input.Gameplay.A.performed += ctx => A();
         input.Gameplay.B.performed += ctx => B();
@@ -134,22 +136,22 @@ public class Controls : MonoBehaviour
 
         // -------------------------------- SWING COMMITMENT ---------------------------------
 
-        if (shuttle.GetComponent<shuttle>().get_towards_player())
+        if (shuttle.GetComponent<shuttle>().get_towards_left())
         {
             Transform hitbox = transform.Find("hitbox");
             float t_add = 0.2f;
 
             Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
             Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add);
-            //if (Vector3.Distance(shuttle.transform.position, hitbox.position) < 3f)
+
             if (Vector3.Distance(future_shuttle_loc, future_hitbox_loc) < 1.5f &&
-                shuttle.GetComponent<shuttle>().get_towards_player())
+                shuttle.GetComponent<shuttle>().get_towards_left())
             {
                 // swing commit
                 if (swing_commit < 0)
                 {
                     swing_commit = max_swing_commit;
-                    audio_manager.GetComponent<audio_manager>().Play("woosh");
+                    audio_manager.GetComponent<audio_manager>().Play("woosh", 0.5f);
                     if (grounded)
                     {
                         if (future_shuttle_loc.y > future_hitbox_loc.y + 1.16f)
@@ -200,7 +202,15 @@ public class Controls : MonoBehaviour
 
     void X()
     {
-        print("x down");
+        if (grounded)
+        {
+            swing_commit_type = 4;
+            anim.SetInteger("shot_type", swing_commit_type);
+            anim.SetTrigger("swing");
+            audio_manager.GetComponent<audio_manager>().Play("leap", 0.4f);
+            rb.velocity += new Vector3(left_stick.x, 0, left_stick.y) * 5; // dash power
+            swing_commit = 20;
+        }
     }
 
     void Y()
@@ -276,7 +286,7 @@ public class Controls : MonoBehaviour
     void HitShuttle(Vector3 target_point, float v_y, float quality)
     {
         if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
-            && shuttle.GetComponent<shuttle>().get_towards_player())
+            && shuttle.GetComponent<shuttle>().get_towards_left())
         {
             if (swing_commit < 0)
             {
@@ -284,12 +294,34 @@ public class Controls : MonoBehaviour
                 anim.SetTrigger("swing");
                 swing_commit = 20;
             }
+            if (mishit)
+            {
+                v_y = 20;
+                audio_manager.GetComponent<audio_manager>().Play("mishit");
+            }
+            else
+            {
+                if (v_y < 0) audio_manager.GetComponent<audio_manager>().Play("hit hard");
+                else audio_manager.GetComponent<audio_manager>().Play("hit medium");
+            }
             shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
-            shuttle.GetComponent<shuttle>().set_towards_player(false);
-            if (v_y < 0) audio_manager.GetComponent<audio_manager>().Play("hit hard", 1);
-            else audio_manager.GetComponent<audio_manager>().Play("hit medium", 1);
+            shuttle.GetComponent<shuttle>().set_towards_left(false);
+            print(mishit);
+            shuttle.GetComponent<TrailRenderer>().enabled = !mishit;
+            shuttle.GetComponent<TrailRenderer>().Clear();
+            shuttle.transform.Find("mishit_line").gameObject.SetActive(mishit);
+            shuttle.transform.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
+
+            // reset values
+            mishit = false;
 
             UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect!!";
+        }
+        else if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x
+            && shuttle.GetComponent<shuttle>().get_towards_left())
+        {
+            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "BOTCH'D";
+            mishit = true;
         }
         else
         {

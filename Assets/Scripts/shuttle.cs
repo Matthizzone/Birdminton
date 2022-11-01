@@ -5,6 +5,7 @@ using UnityEngine;
 public class shuttle : MonoBehaviour
 {
     public GameObject star;
+    public GameObject firework;
 
     float b = 2; // dissipation
     float g = 15; // gravity
@@ -18,7 +19,7 @@ public class shuttle : MonoBehaviour
 
     Vector3 prev_loc = Vector3.zero; // store location from last from for lookat
 
-    bool towards_player = true;
+    bool towards_left = true;
 
     // Update is called once per frame
     void Update()
@@ -76,6 +77,11 @@ public class shuttle : MonoBehaviour
         t_0 = Time.time;
 
         star.transform.position = r_f;
+        firework.transform.position = r_0;
+
+        ParticleSystem.EmitParams emitOverride = new ParticleSystem.EmitParams();
+        emitOverride.startLifetime = 0.5f;
+        firework.GetComponent<ParticleSystem>().Emit(emitOverride, 150);
     }
 
     float get_radius(float t)
@@ -153,12 +159,12 @@ public class shuttle : MonoBehaviour
 
 
 
-    public void set_towards_player(bool new_towards_player)
+    public void set_towards_left(bool new_towards_player)
     {
-        towards_player = new_towards_player;
+        towards_left = new_towards_player;
     }
-    public bool get_towards_player()
+    public bool get_towards_left()
     {
-        return towards_player;
+        return towards_left;
     }
 }

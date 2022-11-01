@@ -9,19 +9,22 @@ public class audio_manager : MonoBehaviour
     private void Awake()
     {
         AudioClip[] SFX_list = Resources.LoadAll<AudioClip>("SFX");
-        
+
         foreach (var sfx in SFX_list)
         {
             SFX[sfx.name] = gameObject.AddComponent<AudioSource>();
             SFX[sfx.name].clip = sfx;
             SFX[sfx.name].playOnAwake = false;
         }
+
+        DontDestroyOnLoad(this.gameObject);
     }
 
     public void Play(string clip_name)
     {
         try
         {
+            SFX[clip_name].volume = 1;
             SFX[clip_name].Play();
         }
         catch (KeyNotFoundException)

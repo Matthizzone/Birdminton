@@ -5,8 +5,10 @@ using UnityEngine;
 public class basic_enemy : MonoBehaviour
 {
     public GameObject shuttle;
-    public GameObject audio_manager;
+    GameObject audio_manager;
     public GameObject UI;
+
+    public bool right_court = false;
 
     private Rigidbody rb;
 
@@ -17,6 +19,7 @@ public class basic_enemy : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        audio_manager = GameObject.Find("audio_manager");
     }
 
     void Update()
@@ -24,7 +27,7 @@ public class basic_enemy : MonoBehaviour
         // MOVE
         Vector3 foot_pos = transform.position;
         foot_pos.y = 0;
-        Vector3 target_pos = shuttle.GetComponent<shuttle>().get_towards_player() ? new Vector3(2.4f, 0, 0) : shuttle.GetComponent<shuttle>().get_land_point();
+        Vector3 target_pos = shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court ? new Vector3(right_court ? 2.4f : -2.4f, 0, 0) : shuttle.GetComponent<shuttle>().get_land_point();
         Vector3 move_dir = target_pos - foot_pos;
         move_dir = move_dir.normalized;
 
@@ -42,7 +45,7 @@ public class basic_enemy : MonoBehaviour
 
 
         // hit birdie
-        if (!shuttle.GetComponent<shuttle>().get_towards_player())
+        if (!shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court)
         {
             if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2)
             {
@@ -81,11 +84,15 @@ public class basic_enemy : MonoBehaviour
     void hit_shuttle()
     {
         if (shuttle.transform.position.y < 0) shuttle.transform.position = transform.position + Vector3.up;
-        shuttle.GetComponent<shuttle>().set_towards_player(true);
+        shuttle.GetComponent<shuttle>().set_towards_left(true ^ right_court);
         shuttle.GetComponent<shuttle>().set_trajectory(
             shuttle.transform.position,
-            new Vector3(Random.Range(-6f, -2f), 0, Random.Range(-3f, 3f)),
+            new Vector3(Random.Range(-6f, -2f), 0, Random.Range(-3f, 3f)) * (right_court ? 1 : -1),
             15);
         audio_manager.GetComponent<audio_manager>().Play("hit soft", 1);
+        shuttle.GetComponent<TrailRenderer>().enabled = true;
+        shuttle.GetComponent<TrailRenderer>().Clear();
+        shuttle.transform.Find("mishit_line").gameObject.SetActive(false);
+        shuttle.transform.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
     }
 }
