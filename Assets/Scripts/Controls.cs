@@ -9,10 +9,8 @@ public class Controls : MonoBehaviour
     Rigidbody rb;
     Animator anim;
 
-    public GameObject shuttle;
-    public GameObject strings;
-    public Camera camera;
-    public GameObject UI;
+    GameObject shuttle;
+    GameObject UI;
     GameObject audio_manager;
 
     public float temp1 = 8;
@@ -37,6 +35,8 @@ public class Controls : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         anim = transform.Find("penguin_tilt").Find("penguin_model").GetComponent<Animator>();
         audio_manager = GameObject.Find("audio_manager");
+        UI = GameObject.Find("UI");
+        shuttle = GameObject.Find("shuttle");
 
         input.Gameplay.A.performed += ctx => A();
         input.Gameplay.B.performed += ctx => B();
@@ -175,7 +175,11 @@ public class Controls : MonoBehaviour
             }
         }
 
-        if (swing_commit > -1) swing_commit--;
+        if (swing_commit > -1)
+        {
+            swing_commit--;
+            if (swing_commit == 0) swing_commit_type = 1;
+        }
     }
 
     void A()
@@ -314,18 +318,11 @@ public class Controls : MonoBehaviour
 
             // reset values
             mishit = false;
-
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "perfect!!";
         }
         else if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x
             && shuttle.GetComponent<shuttle>().get_towards_left())
         {
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "BOTCH'D";
             mishit = true;
-        }
-        else
-        {
-            UI.transform.Find("Quality").GetComponent<TMPro.TMP_Text>().text = "miss...";
         }
     }
 

@@ -6,7 +6,7 @@ public class basic_enemy : MonoBehaviour
 {
     public GameObject shuttle;
     GameObject audio_manager;
-    public GameObject UI;
+    GameObject UI;
 
     public bool right_court = false;
 
@@ -20,6 +20,7 @@ public class basic_enemy : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         audio_manager = GameObject.Find("audio_manager");
+        UI = GameObject.Find("UI");
     }
 
     void Update()
@@ -27,7 +28,7 @@ public class basic_enemy : MonoBehaviour
         // MOVE
         Vector3 foot_pos = transform.position;
         foot_pos.y = 0;
-        Vector3 target_pos = shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court ? new Vector3(right_court ? 2.4f : -2.4f, 0, 0) : shuttle.GetComponent<shuttle>().get_land_point();
+        Vector3 target_pos = shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court ? shuttle.GetComponent<shuttle>().get_land_point() : new Vector3(right_court ? 2.4f : -2.4f, 0, 0);
         Vector3 move_dir = target_pos - foot_pos;
         move_dir = move_dir.normalized;
 
@@ -45,7 +46,7 @@ public class basic_enemy : MonoBehaviour
 
 
         // hit birdie
-        if (!shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court)
+        if (shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court)
         {
             if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2)
             {
@@ -68,7 +69,7 @@ public class basic_enemy : MonoBehaviour
                 {
                     player_score++;
                 }
-                UI.transform.Find("Score").GetComponent<TMPro.TMP_Text>().text = "" + player_score + " - " + enemy_score;
+                UI.transform.Find("Game").Find("Score").GetComponent<TMPro.TMP_Text>().text = "" + player_score + " - " + enemy_score;
             }
             else
             {
@@ -84,7 +85,7 @@ public class basic_enemy : MonoBehaviour
     void hit_shuttle()
     {
         if (shuttle.transform.position.y < 0) shuttle.transform.position = transform.position + Vector3.up;
-        shuttle.GetComponent<shuttle>().set_towards_left(true ^ right_court);
+        shuttle.GetComponent<shuttle>().set_towards_left(right_court);
         shuttle.GetComponent<shuttle>().set_trajectory(
             shuttle.transform.position,
             new Vector3(Random.Range(-6f, -2f), 0, Random.Range(-3f, 3f)) * (right_court ? 1 : -1),
