@@ -11,10 +11,10 @@ public class Controls : MonoBehaviour
 
     GameObject shuttle;
     GameObject UI;
-    GameObject audio_manager;
+    audio_manager audio_manager;
 
-    public float temp1 = 8;
-    public int temp2 = 80;
+    public float temp1 = 0.1f;
+    public float temp2 = 0.9f;
 
     Vector2 left_stick;
     Vector2 right_stick;
@@ -27,6 +27,7 @@ public class Controls : MonoBehaviour
     int a_pressed_ago = 0;
     int b_pressed_ago = 0;
     bool mishit = false;
+    bool serving = true;
 
 
     private void Awake()
@@ -34,7 +35,7 @@ public class Controls : MonoBehaviour
         input = new Input();
         rb = GetComponent<Rigidbody>();
         anim = transform.Find("penguin_tilt").Find("penguin_model").GetComponent<Animator>();
-        audio_manager = GameObject.Find("audio_manager");
+        audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         UI = GameObject.Find("UI");
         shuttle = GameObject.Find("shuttle");
 
@@ -98,6 +99,11 @@ public class Controls : MonoBehaviour
 
 
         // -------------------------------- MOVEMENT ---------------------------------
+        anim.SetBool("serving", serving);
+        if (serving)
+        {
+            shuttle.transform.position = transform.Find("penguin_tilt").Find("penguin_model").Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("shoulder.l").Find("arm.l").Find("forearm.l").Find("forearm.l_end").position;
+        }
 
         Vector3 flat_vel = rb.velocity;
         flat_vel.y = 0;
@@ -108,7 +114,12 @@ public class Controls : MonoBehaviour
         float move_power = 0.3f;
         float friction = 0.91f;
 
-        if (!grounded)
+        if (serving)
+        {
+            move_power = 1;
+            friction = 0.7f;
+        }
+        else if (!grounded)
         {
             move_power = 0.05f;
             friction = 0.984f;
@@ -151,7 +162,7 @@ public class Controls : MonoBehaviour
                 if (swing_commit < 0)
                 {
                     swing_commit = max_swing_commit;
-                    audio_manager.GetComponent<audio_manager>().Play("woosh", 0.5f);
+                    audio_manager.Play("woosh", 0.5f);
                     if (grounded)
                     {
                         if (future_shuttle_loc.y > future_hitbox_loc.y + 1.16f)
@@ -211,7 +222,7 @@ public class Controls : MonoBehaviour
             swing_commit_type = 4;
             anim.SetInteger("shot_type", swing_commit_type);
             anim.SetTrigger("swing");
-            audio_manager.GetComponent<audio_manager>().Play("leap", 0.4f);
+            audio_manager.Play("leap", 0.4f);
             rb.velocity += new Vector3(left_stick.x, 0, left_stick.y) * 5; // dash power
             swing_commit = 20;
         }
@@ -219,7 +230,7 @@ public class Controls : MonoBehaviour
 
     void Y()
     {
-        if (grounded)
+        if (grounded && !serving)
         {
             rb.velocity *= 0.5f;
             rb.velocity = new Vector3(rb.velocity.x, 4f, rb.velocity.z);
@@ -301,16 +312,15 @@ public class Controls : MonoBehaviour
             if (mishit)
             {
                 v_y = 20;
-                audio_manager.GetComponent<audio_manager>().Play("mishit");
+                audio_manager.Play("mishit");
             }
             else
             {
-                if (v_y < 0) audio_manager.GetComponent<audio_manager>().Play("hit hard");
-                else audio_manager.GetComponent<audio_manager>().Play("hit medium");
+                if (v_y < 0) audio_manager.Play("hit hard");
+                else audio_manager.Play("hit medium");
             }
             shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
             shuttle.GetComponent<shuttle>().set_towards_left(false);
-            print(mishit);
             shuttle.GetComponent<TrailRenderer>().enabled = !mishit;
             shuttle.GetComponent<TrailRenderer>().Clear();
             shuttle.transform.Find("mishit_line").gameObject.SetActive(mishit);
@@ -318,6 +328,7 @@ public class Controls : MonoBehaviour
 
             // reset values
             mishit = false;
+            serving = false;
         }
         else if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x
             && shuttle.GetComponent<shuttle>().get_towards_left())
@@ -334,5 +345,10 @@ public class Controls : MonoBehaviour
     public int get_swing_commit_type()
     {
         return swing_commit_type;
+    }
+
+    public bool get_serving()
+    {
+        return serving;
     }
 }

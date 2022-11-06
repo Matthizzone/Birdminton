@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class penguin_anim : MonoBehaviour
+public class enemy_anim : MonoBehaviour
 {
     public GameObject shuttle;
 
@@ -12,6 +12,7 @@ public class penguin_anim : MonoBehaviour
     Rigidbody rb;
     Animator anim;
     bool swing_commit = false;
+    public bool right_court = false;
 
     Vector3 prev_vel = Vector3.zero;
     Quaternion tilt = Quaternion.Euler(0, 90, 0);
@@ -20,7 +21,7 @@ public class penguin_anim : MonoBehaviour
 
     private void Start()
     {
-        rb = transform.parent.parent.GetComponent<Rigidbody>();
+        rb = transform.parent.GetComponent<Rigidbody>();
         anim = transform.GetComponent<Animator>();
         prev_head_rotation = transform.Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head").transform.rotation;
     }
@@ -28,10 +29,10 @@ public class penguin_anim : MonoBehaviour
     void LateUpdate()
     {
         // --------------------------------------- TURNING ---------------------------------------------
-        int shot_type = transform.parent.parent.GetComponent<Controls>().get_swing_commit_type();
-        Vector3 target_angle = Vector3.right * (shot_type == 1 ? -1 : 1);
-        if (transform.parent.parent.GetComponent<Controls>().get_swing_commit() < 0) target_angle = new Vector3(-rb.velocity.z, 0, rb.velocity.x);
-        if (transform.parent.parent.GetComponent<Controls>().get_serving()) target_angle = Vector3.right;
+        int shot_type = transform.parent.GetComponent<basic_enemy>().get_swing_commit_type();
+        Vector3 target_angle = Vector3.right * (shot_type == 1 ^ right_court ? -1 : 1);
+        if (transform.parent.GetComponent<basic_enemy>().get_swing_commit() < 0) target_angle = new Vector3(-rb.velocity.z, 0, rb.velocity.x);
+        if (transform.parent.GetComponent<basic_enemy>().get_serving()) target_angle = Vector3.right;
 
         target_angle = Vector3.RotateTowards(transform.forward, target_angle, 0.2f, 0);
         target_angle.y = 0;
@@ -42,7 +43,7 @@ public class penguin_anim : MonoBehaviour
             float angle = Vector3.Angle(Vector3.right, target_angle) * Mathf.Sign(Vector3.Dot(Vector3.forward, target_angle));
             target_angle *= angle <= 180 && angle > 45 ? 1 : -1;
         } */
-
+        
         transform.LookAt(transform.position + target_angle);
 
         // -------------------------------------- ACCEL TILT -------------------------------------------

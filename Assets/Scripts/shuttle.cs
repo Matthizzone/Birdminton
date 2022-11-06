@@ -6,6 +6,11 @@ public class shuttle : MonoBehaviour
 {
     public GameObject star;
     public GameObject firework;
+    Rigidbody rb;
+    audio_manager audio_manager;
+
+    public float temp1 = 5;
+    public float temp2 = 360;
 
     float b = 2; // dissipation
     float g = 15; // gravity
@@ -20,18 +25,27 @@ public class shuttle : MonoBehaviour
     Vector3 prev_loc = Vector3.zero; // store location from last from for lookat
 
     bool towards_left = true;
+    bool in_flight = false;
 
-    // Update is called once per frame
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
+    }
+
     void Update()
     {
         // plug in t
-        transform.position = get_pos(Time.time);
+        if (in_flight)
+        {
+            transform.position = get_pos(Time.time);
 
-        Vector3 look_vector = transform.position - prev_loc;
-        transform.LookAt(transform.position + look_vector);
-        prev_loc = transform.position;
+            Vector3 look_vector = transform.position - prev_loc;
+            transform.LookAt(transform.position + look_vector);
+            prev_loc = transform.position;
 
-        star.transform.GetChild(1).localScale = Vector3.one * 100 * Mathf.Exp(-get_height(Time.time - t_0) / 5);
+            star.transform.GetChild(1).localScale = Vector3.one * 100 * Mathf.Exp(-get_height(Time.time - t_0) / 5);
+        }
     }
 
     public Vector3 get_pos(float t)
@@ -82,6 +96,9 @@ public class shuttle : MonoBehaviour
         ParticleSystem.EmitParams emitOverride = new ParticleSystem.EmitParams();
         emitOverride.startLifetime = 0.5f;
         firework.GetComponent<ParticleSystem>().Emit(emitOverride, 150);
+        in_flight = true;
+        GetComponent<shuttle>().enabled = true;
+        rb.velocity = Vector3.zero;
     }
 
     float get_radius(float t)
@@ -166,5 +183,28 @@ public class shuttle : MonoBehaviour
     public bool get_towards_left()
     {
         return towards_left;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (in_flight)
+        {
+            in_flight = false;
+            GetComponent<shuttle>().enabled = false;
+
+            Vector3 flat_vel = (get_pos(Time.time) - get_pos(Time.time - 0.1f)) * 10;
+            flat_vel.y = -flat_vel.y;
+            rb.velocity = flat_vel * 0.35f;
+
+            if (Mathf.Abs(flat_vel.y) > 7) audio_manager.Play("bounce_hard", 0.4f);
+            else audio_manager.Play("bounce_soft", 0.2f);
+
+            rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+        }
+    }
+
+    public bool get_in_flight()
+    {
+        return in_flight;
     }
 }

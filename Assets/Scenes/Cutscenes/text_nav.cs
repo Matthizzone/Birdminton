@@ -252,8 +252,17 @@ public class text_nav : MonoBehaviour
 
     void Start_down()
     {
-        advance_count = 180;
-        LoadNextScene();
+        if (phrase_i < 9)
+        {
+            phrase_i = 9;
+            character = 0;
+            transition = true;
+            fadeout = 50;
+            wait = 150;
+            audio_manager.GetComponent<audio_manager>().Play("logo_new");
+            fadein = 50;
+            audio_manager.GetComponent<audio_manager>().Stop("text");
+        }
     }
 
     void LoadNextScene()

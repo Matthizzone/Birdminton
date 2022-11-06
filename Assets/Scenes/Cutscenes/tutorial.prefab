@@ -226,7 +226,7 @@ GameObject:
   - component: {fileID: 3931065649312752689}
   - component: {fileID: 7342373251444710976}
   m_Layer: 5
-  m_Name: Coach1
+  m_Name: tutorial
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -5,30 +5,42 @@ using UnityEngine;
 public class basic_enemy : MonoBehaviour
 {
     public GameObject shuttle;
-    GameObject audio_manager;
+    audio_manager audio_manager;
     GameObject UI;
+    Animator anim;
 
     public bool right_court = false;
 
     private Rigidbody rb;
 
-    private int serve_countdown = 0; // 0: serve on first frame, -1 is don't serve on first frame (let birdie drop)
-    private int enemy_score = 0;
-    private int player_score = 0;
+    int serve_countdown = 0; // 0: serve on first frame, -1 is don't serve on first frame (let birdie drop)
+    int enemy_score = 0;
+    int player_score = 0;
+    bool to_me = false;
+    int swing_commit = -1;
+    int swing_commit_type;
+    bool serving = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        audio_manager = GameObject.Find("audio_manager");
+        audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         UI = GameObject.Find("UI");
+        anim = transform.Find("hubert").GetComponent<Animator>();
     }
 
     void Update()
     {
+        to_me = shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court;
+        anim.SetBool("serving", false);
+
         // MOVE
         Vector3 foot_pos = transform.position;
         foot_pos.y = 0;
-        Vector3 target_pos = shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court ? shuttle.GetComponent<shuttle>().get_land_point() : new Vector3(right_court ? 2.4f : -2.4f, 0, 0);
+        Vector3 target_pos = to_me ? shuttle.GetComponent<shuttle>().get_land_point() : new Vector3(right_court ? 2.4f : -2.4f, 0, 0);
+        target_pos = !shuttle.GetComponent<shuttle>().get_in_flight() && to_me ? shuttle.transform.position : target_pos; // go get the birdie
+        
+        
         Vector3 move_dir = target_pos - foot_pos;
         move_dir = move_dir.normalized;
 
@@ -40,13 +52,16 @@ public class basic_enemy : MonoBehaviour
 
         flat_vel += transform.right * move_dir.x * move_power;
         flat_vel += transform.forward * move_dir.z * move_power;
+        if (Vector3.Distance(transform.position, target_pos) < 0.2f) flat_vel = Vector3.zero;
         flat_vel *= friction;
 
         rb.velocity = new Vector3(flat_vel.x, rb.velocity.y, flat_vel.z);
+        
+        anim.SetFloat("speed", rb.velocity.magnitude);
 
 
         // hit birdie
-        if (shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court)
+        if (to_me)
         {
             if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2)
             {
@@ -54,32 +69,42 @@ public class basic_enemy : MonoBehaviour
             }
         }
 
-        if (shuttle.transform.position.y < 0f)
-        {
-            if (serve_countdown < 0)
-            {
-                serve_countdown = 60;
 
-                //scoring
-                if (shuttle.transform.position.x < 0f)
-                {
-                    enemy_score++;
-                }
-                else
-                {
-                    player_score++;
-                }
-                UI.transform.Find("Game").Find("Score").GetComponent<TMPro.TMP_Text>().text = "" + player_score + " - " + enemy_score;
-            }
-            else
+        // -------------------------------- SWING COMMITMENT ---------------------------------
+
+        if (to_me)
+        {
+            Transform hitbox = transform.Find("hitbox");
+            float t_add = 0.2f;
+
+            Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
+            Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add);
+
+            print(Vector3.Distance(future_shuttle_loc, future_hitbox_loc));
+
+            if (Vector3.Distance(future_shuttle_loc, future_hitbox_loc) < 1.5f)
             {
-                serve_countdown--;
-                if (serve_countdown < 0)
+                // swing commit
+                if (swing_commit < 0)
                 {
-                    hit_shuttle();
+                    swing_commit = 50;
+                    audio_manager.Play("woosh", 0.5f);
+                    if (future_shuttle_loc.y > future_hitbox_loc.y + 1.16f)
+                        swing_commit_type = 2;
+                    else
+                    {
+                        if (rb.velocity.z < 0)
+                            swing_commit_type = right_court ? 1 : 0;
+                        else
+                            swing_commit_type = right_court ? 0 : 1;
+                    }
+                    anim.SetInteger("shot_type", swing_commit_type);
+                    anim.SetTrigger("swing");
                 }
             }
         }
+        if (swing_commit >= 0) swing_commit--;
+        print(swing_commit);
     }
 
     void hit_shuttle()
@@ -90,10 +115,25 @@ public class basic_enemy : MonoBehaviour
             shuttle.transform.position,
             new Vector3(Random.Range(-6f, -2f), 0, Random.Range(-3f, 3f)) * (right_court ? 1 : -1),
             15);
-        audio_manager.GetComponent<audio_manager>().Play("hit soft", 1);
+        audio_manager.Play("hit soft", 1);
         shuttle.GetComponent<TrailRenderer>().enabled = true;
         shuttle.GetComponent<TrailRenderer>().Clear();
         shuttle.transform.Find("mishit_line").gameObject.SetActive(false);
         shuttle.transform.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
+    }
+
+    public int get_swing_commit()
+    {
+        return swing_commit;
+    }
+
+    public int get_swing_commit_type()
+    {
+        return swing_commit_type;
+    }
+
+    public bool get_serving()
+    {
+        return serving;
     }
 }
