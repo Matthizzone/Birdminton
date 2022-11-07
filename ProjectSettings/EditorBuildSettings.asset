@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Permanent.unity
     guid: 44354fcdc047b5d49aad7f5860e3ee56
   - enabled: 1
-    path: Assets/Scenes/Story Cards.unity
+    path: Assets/Scenes/UI Only.unity
     guid: 06a3d2d5f7c0d7d46accb49b08803ce7
   - enabled: 1
     path: Assets/Scenes/Court.unity

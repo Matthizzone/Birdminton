@@ -27,7 +27,7 @@ public class basic_enemy : MonoBehaviour
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         UI = GameObject.Find("UI");
         shuttle = GameObject.Find("shuttle");
-        anim = transform.Find("hubert").GetComponent<Animator>();
+        anim = transform.Find("penguin_model").GetComponent<Animator>();
     }
 
     void Update()

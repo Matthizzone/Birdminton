@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &632334119633276110
 RectTransform:
   m_ObjectHideFlags: 0
@@ -224,9 +224,9 @@ GameObject:
   - component: {fileID: 3931065649312752688}
   - component: {fileID: 3931065649312752690}
   - component: {fileID: 3931065649312752689}
-  - component: {fileID: 7342373251444710976}
+  - component: {fileID: 757901260225588726}
   m_Layer: 5
-  m_Name: Coach1
+  m_Name: Coach2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -291,7 +291,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &7342373251444710976
+--- !u!114 &757901260225588726
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -300,10 +300,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3931065649312752695}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 844afd4e1e186c64c82143575646116d, type: 3}
+  m_Script: {fileID: 11500000, guid: ecf1ab88a2ec68541b07cb72bba6eb3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  next_UI: {fileID: 3714058277173182974, guid: d6738f113c3c3da4b8c65e18ef4870b6, type: 3}
+  next_UI: {fileID: 1034979466610177495, guid: 11425e5bc615dfb4c8f9c94574f5c2ed, type: 3}
 --- !u!1 &8192996225890796569
 GameObject:
   m_ObjectHideFlags: 0

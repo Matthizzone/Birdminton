@@ -10,8 +10,10 @@ using UnityEngine.Rendering.Universal;
 public class coach_1: MonoBehaviour
 {
     Input input;
-    GameObject audio_manager;
+    audio_manager audio_manager;
     GameObject UI;
+
+    public GameObject next_UI;
 
     Vector2 left_stick;
     Vector2 right_stick;
@@ -43,7 +45,7 @@ public class coach_1: MonoBehaviour
     private void Awake()
     {
         input = new Input();
-        audio_manager = GameObject.Find("audio_manager");
+        audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
 
         input.Gameplay.A.performed += ctx => A();
         input.Gameplay.B.performed += ctx => B();
@@ -105,7 +107,16 @@ public class coach_1: MonoBehaviour
                     tmp.active = false;
                 }
                 GameObject.Find("Players").transform.Find("enemy_left").gameObject.SetActive(false);
+                GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(false);
                 GameObject.Find("Players").transform.Find("player").gameObject.SetActive(true);
+                GameObject.Find("Players").transform.Find("hubert").gameObject.SetActive(true);
+            }
+            if (circle_change == 0)
+            {
+                GameObject next_UI_new = Instantiate(next_UI);
+                next_UI_new.transform.SetParent(transform.parent);
+                next_UI_new.transform.position = new Vector3(960, 540, 0);
+                Destroy(gameObject);
             }
             circle_change--;
         }
@@ -114,9 +125,9 @@ public class coach_1: MonoBehaviour
             if (camera_change < 0)
             {
                 if (char_i < 0.1f)
-                    audio_manager.GetComponent<audio_manager>().Play("text");
+                    audio_manager.Play("text");
                 else if (char_i >= lines[line_i, 1].Length)
-                    audio_manager.GetComponent<audio_manager>().Stop("text");
+                    audio_manager.Stop("text");
 
                 if (char_i < lines[line_i, 1].Length)
                 {
@@ -164,8 +175,8 @@ public class coach_1: MonoBehaviour
             {
                 line_i++;
                 char_i = 0;
-                audio_manager.GetComponent<audio_manager>().Stop("text");
-                audio_manager.GetComponent<audio_manager>().Play("text");
+                audio_manager.Stop("text");
+                audio_manager.Play("text");
             }
             else
             {
@@ -173,7 +184,7 @@ public class coach_1: MonoBehaviour
                 if (circle_change > 999)
                 {
                     transform.Find("Dialogue").gameObject.SetActive(false);
-                    audio_manager.GetComponent<audio_manager>().Stop("text");
+                    audio_manager.Stop("text");
                     circle_change = 150;
                 }
             }

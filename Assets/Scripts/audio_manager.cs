@@ -54,6 +54,10 @@ public class audio_manager : MonoBehaviour
                 SFX[clip_name].volume = volume;
                 SFX[clip_name].Play();
             }
+            else
+            {
+                SFX[clip_name].volume = volume;
+            }
         }
         catch (KeyNotFoundException)
         {
@@ -73,12 +77,19 @@ public class audio_manager : MonoBehaviour
         }
     }
 
-    public void Loop(string clip_name, float volume)
+    public void Loop(string clip_name, float volume) // or set volume
     {
         try
         {
-            Music[clip_name].volume = volume;
-            Music[clip_name].Play();
+            if (Music[clip_name].isPlaying)
+            {
+                Music[clip_name].volume = volume;
+            }
+            else
+            {
+                Music[clip_name].volume = volume;
+                Music[clip_name].Play();
+            }
         }
         catch (KeyNotFoundException)
         {

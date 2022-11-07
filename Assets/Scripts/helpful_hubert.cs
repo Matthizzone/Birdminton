@@ -35,6 +35,6 @@ public class helpful_hubert : MonoBehaviour
         shuttle.GetComponent<TrailRenderer>().Clear();
         shuttle.transform.Find("mishit_line").gameObject.SetActive(false);
         shuttle.transform.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
-        transform.Find("hubert").GetComponent<Animator>().SetTrigger("serve");
+        transform.Find("hubert_model").GetComponent<Animator>().SetTrigger("serve");
     }
 }

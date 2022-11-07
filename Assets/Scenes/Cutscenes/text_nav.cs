@@ -96,7 +96,7 @@ public class text_nav : MonoBehaviour
             }
             else
             {
-                if (character < 0.1f)
+                if (character < 0.1f && phrase_i < phrases.Length)
                     audio_manager.GetComponent<audio_manager>().Play("text");
                 else if (character >= phrases[phrase_i].Length)
                     audio_manager.GetComponent<audio_manager>().Stop("text");
@@ -183,7 +183,7 @@ public class text_nav : MonoBehaviour
 
     void handle_scene_change()
     {
-        transform.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, Mathf.Min(1.5f - Mathf.Abs(180 - advance_count) / 120f, 1));
+        transform.parent.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, Mathf.Min(1.5f - Mathf.Abs(180 - advance_count) / 120f, 1));
         advance_count--;
         if (advance_count == 180)
         {
@@ -270,12 +270,13 @@ public class text_nav : MonoBehaviour
         transform.Find("logo").GetComponent<RawImage>().enabled = false;
         audio_manager.GetComponent<audio_manager>().Stop("text");
         audio_manager.GetComponent<audio_manager>().Play("court_intro");
+        Destroy(transform.Find("Curtain").gameObject);
         GameObject n = Instantiate(next_scene);
         n.transform.SetParent(transform.parent);
         n.transform.position = new Vector3(960, 540, 0);
         audio_manager.GetComponent<audio_manager>().Loop("gym_sound", 1);
         SceneManager.LoadScene("Court", LoadSceneMode.Additive);
-        SceneManager.UnloadSceneAsync("Story Cards");
+        SceneManager.UnloadSceneAsync("UI Only");
     }
 
     void Select()

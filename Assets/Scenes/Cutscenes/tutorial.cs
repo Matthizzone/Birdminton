@@ -14,16 +14,19 @@ public class tutorial : MonoBehaviour
     Controls controls;
     GameObject shuttle;
 
+    public GameObject next_UI;
+
     Vector2 left_stick;
     Vector2 right_stick;
     Vector2 triggers;
 
     float characters = 0;
-    float character_speed = 1; // change back to 0.4f
+    float character_speed = 0.4f;
     int phase = 0;
     int phase_frame_count = 0;
     bool a_enabled = false;
     int success_count;
+    bool shuttle_was_hit = false;
 
     private void Awake()
     {
@@ -81,14 +84,6 @@ public class tutorial : MonoBehaviour
     private void Update()
     {
         handle_transition();
-
-        if (phase == 2 && !shuttle.GetComponent<shuttle>().get_in_flight() && !shuttle.GetComponent<shuttle>().get_towards_left())
-        {
-            transform.Find("Dialogue").gameObject.SetActive(true);
-            controls.enable_some(false, false, false, false, false, false);
-            phase++;
-        }
-
         phase_frame_count++;
     }
 
@@ -96,27 +91,43 @@ public class tutorial : MonoBehaviour
     {
         if (a_enabled)
         {
-            if (phase == 1 || phase == 3)
+            if (phase == 1)
+            {
+                shuttle.GetComponent<shuttle>().set_towards_left(true);
+                transform.Find("Dialogue").gameObject.SetActive(false);
+                controls.enable_some(false, false, false, true, false, false);
+                transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
+            }
+            else if (phase == 3)
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, false, true, false, false);
+                transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
             }
-            if (phase == 5)
+            else if (phase == 5)
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, false, false, false);
+                transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
             }
-            if (phase == 7 || phase == 11 || phase == 13)
+            else if (phase == 7)
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, true, false, false);
             }
-            if (phase == 15)
+            else if (phase == 11 || phase == 13)
+            {
+                transform.Find("Dialogue").gameObject.SetActive(false);
+                controls.enable_some(false, false, true, true, false, false);
+                transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
+            }
+            else if (phase == 15)
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, false, true, false);
+                transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
             }
-            if (phase == 19)
+            else if (phase == 19)
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, true, true, false);
@@ -141,12 +152,22 @@ public class tutorial : MonoBehaviour
             a_enabled = fill_text("Hubert", "Hit the shuttle over to me by pressing B.");
             return;
         }
-        else if (phase == 2) // waiting for A
+        else if (phase == 2) // waiting for B
         {
-            if (Mathf.FloorToInt(phase_frame_count / 40) % 2 == 1)
-                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/joy1");
+            if (Mathf.FloorToInt(phase_frame_count / 40) % 2 == 0)
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/controller");
             else
-                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/joy2");
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/B");
+
+            if (!shuttle_was_hit && shuttle.GetComponent<shuttle>().get_in_flight()) shuttle_was_hit = true;
+
+            if (shuttle_was_hit && !shuttle.GetComponent<shuttle>().get_in_flight())
+            {
+                transform.Find("Dialogue").gameObject.SetActive(true);
+                controls.enable_some(false, false, false, false, false, false);
+                transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
+                phase++;
+            }
 
             return;
         }
@@ -168,10 +189,16 @@ public class tutorial : MonoBehaviour
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
                     controls.enable_some(false, false, false, false, false, false);
+                    transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
                     success_count = 0;
                 }
-                else GameObject.Find("enemy_right").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(-3f, 0, 0));
+                else GameObject.Find("hubert").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(-3f, 0, 0));
             }
+            
+            if (phase_frame_count % 220 > 60 && phase_frame_count % 220 < 110)
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/B");
+            else
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/controller");
         }
         else if (phase == 5) // text
         {
@@ -181,11 +208,18 @@ public class tutorial : MonoBehaviour
         else if (phase == 6) // move around
         {
             if (left_stick.magnitude > 0.5f) success_count++;
+
+            if (phase_frame_count % 80 > 40 && phase_frame_count % 80 < 80)
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/joy1");
+            else
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/joy2");
+
             if (success_count > 300)
             {
                 phase++;
                 transform.Find("Dialogue").gameObject.SetActive(true);
                 controls.enable_some(false, false, false, false, false, false);
+                transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
                 success_count = 0;
             }
         }
@@ -205,9 +239,10 @@ public class tutorial : MonoBehaviour
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
                     controls.enable_some(false, false, false, false, false, false);
+                    transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
                     success_count = 0;
                 }
-                else GameObject.Find("enemy_right").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -5), 0, Random.Range(-2, 2)));
+                else GameObject.Find("hubert").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -5), 0, Random.Range(-2, 2)));
             }
         }
         else if (phase == 9) // text
@@ -227,6 +262,11 @@ public class tutorial : MonoBehaviour
         }
         else if (phase == 12) // top box
         {
+            if (phase_frame_count % 220 > 60 && phase_frame_count % 220 < 110)
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/topbox");
+            else
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/controller");
+
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
                 if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0 && shuttle.transform.position.z > 0.5f) success_count++;
@@ -236,9 +276,10 @@ public class tutorial : MonoBehaviour
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
                     controls.enable_some(false, false, false, false, false, false);
+                    transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
                     success_count = 0;
                 }
-                else GameObject.Find("enemy_right").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
+                else GameObject.Find("hubert").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
             }
         }
         else if (phase == 13) // text
@@ -248,6 +289,11 @@ public class tutorial : MonoBehaviour
         }
         else if (phase == 14) // bottom box
         {
+            if (phase_frame_count % 220 > 60 && phase_frame_count % 220 < 110)
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/bottombox");
+            else
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/controller");
+
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
                 if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0 && shuttle.transform.position.z < -0.5f) success_count++;
@@ -257,9 +303,10 @@ public class tutorial : MonoBehaviour
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
                     controls.enable_some(false, false, false, false, false, false);
+                    transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
                     success_count = 0;
                 }
-                else GameObject.Find("enemy_right").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
+                else GameObject.Find("hubert").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
             }
         }
         else if (phase == 15) // text
@@ -269,8 +316,14 @@ public class tutorial : MonoBehaviour
         }
         else if (phase == 16) // drop shots
         {
+            if (phase_frame_count % 220 > 60 && phase_frame_count % 220 < 110)
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/A");
+            else
+                transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/controller");
+
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
+
                 if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0) success_count++;
 
                 if (success_count == 4) // you get one for free because of the first hit.
@@ -278,9 +331,10 @@ public class tutorial : MonoBehaviour
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
                     controls.enable_some(false, false, false, false, false, false);
+                    transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
                     success_count = 0;
                 }
-                else GameObject.Find("enemy_right").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
+                else GameObject.Find("hubert").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
             }
         }
         else if (phase == 17) // text
@@ -309,9 +363,10 @@ public class tutorial : MonoBehaviour
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
                     controls.enable_some(false, false, false, false, false, false);
+                    transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
                     success_count = 0;
                 }
-                else GameObject.Find("enemy_right").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
+                else GameObject.Find("hubert").GetComponent<helpful_hubert>().hit_shuttle(new Vector3(Random.Range(-2, -4), 0, Random.Range(-1, 1)));
             }
         }
         else if (phase == 21) // text
@@ -325,6 +380,7 @@ public class tutorial : MonoBehaviour
             GameObject.Find("CircleMask").GetComponent<RectTransform>().sizeDelta = new Vector2(sizeDelt, sizeDelt);
             if (phase_frame_count == 75)
             {
+                transform.Find("Dialogue").gameObject.SetActive(false);
                 GameObject.Find("Cameras").transform.Find("cutscene_cam").gameObject.SetActive(true);
                 GameObject.Find("Cameras").transform.Find("game_cam").gameObject.SetActive(false);
                 GameObject.Find("UI").transform.Find("Game").gameObject.SetActive(false);
@@ -334,13 +390,17 @@ public class tutorial : MonoBehaviour
                 {
                     tmp.active = false;
                 }
-                //GameObject.Find("Players").transform.Find("enemy_left").gameObject.SetActive(true);
-                //GameObject.Find("Players").transform.Find("player").gameObject.SetActive(false);
-
+                GameObject.Find("Players").transform.Find("enemy_left").gameObject.SetActive(true);
+                GameObject.Find("Players").transform.Find("hubert").gameObject.SetActive(true);
+                GameObject.Find("Players").transform.Find("player").gameObject.SetActive(false);
+                GameObject.Find("Players").transform.Find("hubert").gameObject.SetActive(false);
             }
             if (phase_frame_count > 150)
             {
                 // done!
+                GameObject next_UI_new = Instantiate(next_UI);
+                next_UI_new.transform.SetParent(transform.parent);
+                next_UI_new.transform.position = new Vector3(960, 540, 0);
                 Destroy(gameObject);
             }
         }
@@ -379,7 +439,7 @@ public class tutorial : MonoBehaviour
 
     void B()
     {
-        print("b down");
+        print("b down"); 
     }
 
     void X()

@@ -310,7 +310,7 @@ public class Controls : MonoBehaviour
     void HitShuttle(Vector3 target_point, float v_y, float quality)
     {
         if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
-            && shuttle.GetComponent<shuttle>().get_towards_left())
+            && (shuttle.GetComponent<shuttle>().get_in_flight() || serving) && shuttle.GetComponent<shuttle>().get_towards_left())
         {
             if (swing_commit < 0)
             {

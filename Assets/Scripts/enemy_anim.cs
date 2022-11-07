@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class enemy_anim : MonoBehaviour
 {
-    public GameObject shuttle;
+    GameObject shuttle;
 
     public float temp1 = 0;
     public float temp2 = 0;
@@ -23,6 +23,7 @@ public class enemy_anim : MonoBehaviour
     {
         rb = transform.parent.GetComponent<Rigidbody>();
         anim = transform.GetComponent<Animator>();
+        shuttle = GameObject.Find("shuttle");
         prev_head_rotation = transform.Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head").transform.rotation;
     }
     // Update is called once per frame
