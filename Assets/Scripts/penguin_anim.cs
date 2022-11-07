@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class penguin_anim : MonoBehaviour
 {
-    public GameObject shuttle;
+    GameObject shuttle;
 
     public float temp1 = 0;
     public float temp2 = 0;
@@ -23,6 +23,7 @@ public class penguin_anim : MonoBehaviour
         rb = transform.parent.parent.GetComponent<Rigidbody>();
         anim = transform.GetComponent<Animator>();
         prev_head_rotation = transform.Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head").transform.rotation;
+        shuttle = GameObject.Find("shuttle");
     }
     // Update is called once per frame
     void LateUpdate()
@@ -55,9 +56,7 @@ public class penguin_anim : MonoBehaviour
             Quaternion.Euler((rb.velocity.x - prev_vel.x) * tilt_factor, 90, (rb.velocity.z - prev_vel.z) * tilt_factor),
             1 - Mathf.Exp(-10 * Time.deltaTime)
         );
-
         transform.parent.localRotation = tilt;
-
         prev_vel = rb.velocity;
         */
 
@@ -86,7 +85,7 @@ public class penguin_anim : MonoBehaviour
         PointEye(head.Find("left_eye"));
         PointEye(head.Find("right_eye"));
 
-        
+
 
         // --------------------------------------- ANIMATOR --------------------------------------------
 
@@ -122,7 +121,7 @@ public class penguin_anim : MonoBehaviour
 
         if (up_down_angle > 90) up_down_angle = 90; // make sure pupil stays in eye
         if (up_down_angle < -90) up_down_angle = -90;
-        
+
 
 
         Vector3 new_eye_position = new Vector3(up_down_angle / 90, 0, left_right_angle / 90);

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class basic_enemy : MonoBehaviour
 {
-    public GameObject shuttle;
+    GameObject shuttle;
     audio_manager audio_manager;
     GameObject UI;
     Animator anim;
@@ -26,6 +26,7 @@ public class basic_enemy : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         UI = GameObject.Find("UI");
+        shuttle = GameObject.Find("shuttle");
         anim = transform.Find("hubert").GetComponent<Animator>();
     }
 
@@ -80,8 +81,6 @@ public class basic_enemy : MonoBehaviour
             Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
             Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add);
 
-            print(Vector3.Distance(future_shuttle_loc, future_hitbox_loc));
-
             if (Vector3.Distance(future_shuttle_loc, future_hitbox_loc) < 1.5f)
             {
                 // swing commit
@@ -104,7 +103,6 @@ public class basic_enemy : MonoBehaviour
             }
         }
         if (swing_commit >= 0) swing_commit--;
-        print(swing_commit);
     }
 
     void hit_shuttle()

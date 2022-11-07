@@ -45,6 +45,8 @@ public class shuttle : MonoBehaviour
             prev_loc = transform.position;
 
             star.transform.GetChild(1).localScale = Vector3.one * 100 * Mathf.Exp(-get_height(Time.time - t_0) / 5);
+
+            if (get_pos(Time.time).y < 0.01f) kill_flight();
         }
     }
 
@@ -185,22 +187,19 @@ public class shuttle : MonoBehaviour
         return towards_left;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void kill_flight()
     {
-        if (in_flight)
-        {
-            in_flight = false;
-            GetComponent<shuttle>().enabled = false;
+        in_flight = false;
+        GetComponent<shuttle>().enabled = false;
 
-            Vector3 flat_vel = (get_pos(Time.time) - get_pos(Time.time - 0.1f)) * 10;
-            flat_vel.y = -flat_vel.y;
-            rb.velocity = flat_vel * 0.35f;
+        Vector3 flat_vel = (get_pos(Time.time) - get_pos(Time.time - 0.1f)) * 10;
+        flat_vel.y = -flat_vel.y;
+        rb.velocity = flat_vel * 0.35f;
 
-            if (Mathf.Abs(flat_vel.y) > 7) audio_manager.Play("bounce_hard", 0.4f);
-            else audio_manager.Play("bounce_soft", 0.2f);
+        if (Mathf.Abs(flat_vel.y) > 7) audio_manager.Play("bounce_hard", 0.4f);
+        else audio_manager.Play("bounce_soft", 0.2f);
 
-            rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-        }
+        rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
     }
 
     public bool get_in_flight()

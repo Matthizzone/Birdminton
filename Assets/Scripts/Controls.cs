@@ -29,6 +29,13 @@ public class Controls : MonoBehaviour
     bool mishit = false;
     bool serving = true;
 
+    bool jump_enabled = true;
+    bool dash_enabled = true;
+    bool move_enabled = true;
+    bool clear_enabled = true;
+    bool drop_enabled = true;
+    bool smash_enabled = true;
+
 
     private void Awake()
     {
@@ -125,6 +132,8 @@ public class Controls : MonoBehaviour
             friction = 0.984f;
         }
 
+        if (!move_enabled) move_power = 0;
+
         flat_vel += transform.right * leftstick_unit_length.x * move_power;
         flat_vel += transform.forward * leftstick_unit_length.y * move_power;
         flat_vel *= friction;
@@ -136,12 +145,12 @@ public class Controls : MonoBehaviour
         if (a_pressed_ago > 0)
         {
             a_pressed_ago--;
-            if (a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 5, 100); // drop
+            if (drop_enabled && a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 5, 100); // drop
         }
         if (b_pressed_ago > 0)
         {
             b_pressed_ago--;
-            if (b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15, 100); // clear
+            if (clear_enabled && b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15, 100); // clear
         }
 
 
@@ -197,7 +206,7 @@ public class Controls : MonoBehaviour
     {
         if (b_pressed_ago > 0)
         {
-            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
+            if (smash_enabled) HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
             b_pressed_ago = 0;
         }
         else
@@ -208,7 +217,7 @@ public class Controls : MonoBehaviour
     {
         if (a_pressed_ago > 0)
         {
-            HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
+            if (smash_enabled) HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
             a_pressed_ago = 0;
         }
         else
@@ -217,7 +226,7 @@ public class Controls : MonoBehaviour
 
     void X()
     {
-        if (grounded)
+        if (dash_enabled && grounded)
         {
             swing_commit_type = 4;
             anim.SetInteger("shot_type", swing_commit_type);
@@ -230,7 +239,7 @@ public class Controls : MonoBehaviour
 
     void Y()
     {
-        if (grounded && !serving)
+        if (jump_enabled && grounded && !serving)
         {
             rb.velocity *= 0.5f;
             rb.velocity = new Vector3(rb.velocity.x, 4f, rb.velocity.z);
@@ -350,5 +359,15 @@ public class Controls : MonoBehaviour
     public bool get_serving()
     {
         return serving;
+    }
+
+    public void enable_some(bool jump, bool dash, bool move, bool clear, bool drop, bool smash)
+    {
+        jump_enabled = jump;
+        dash_enabled = dash;
+        move_enabled = move;
+        clear_enabled = clear;
+        drop_enabled = drop;
+        smash_enabled = smash;
     }
 }
