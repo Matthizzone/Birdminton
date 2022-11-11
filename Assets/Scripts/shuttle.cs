@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class shuttle : MonoBehaviour
 {
-    public GameObject star;
     public GameObject firework;
     Rigidbody rb;
     audio_manager audio_manager;
@@ -43,8 +42,6 @@ public class shuttle : MonoBehaviour
             Vector3 look_vector = transform.position - prev_loc;
             transform.LookAt(transform.position + look_vector);
             prev_loc = transform.position;
-
-            star.transform.GetChild(1).localScale = Vector3.one * 100 * Mathf.Exp(-get_height(Time.time - t_0) / 5);
 
             if (get_pos(Time.time).y < 0.01f) kill_flight();
         }
@@ -92,7 +89,7 @@ public class shuttle : MonoBehaviour
         // initiate new flight
         t_0 = Time.time;
 
-        star.transform.position = r_f;
+        GameObject.Find("dropspot").GetComponent<dropspot>().new_trajectory(find_height_zero() + Time.time, r_f);
         firework.transform.position = r_0;
 
         ParticleSystem.EmitParams emitOverride = new ParticleSystem.EmitParams();
@@ -176,7 +173,10 @@ public class shuttle : MonoBehaviour
         return r_f;
     }
 
-
+    public float get_land_time()
+    {
+        return t_0 + find_height_zero();
+    }
 
     public void set_towards_left(bool new_towards_player)
     {

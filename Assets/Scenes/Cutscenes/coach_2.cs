@@ -153,7 +153,7 @@ public class coach_2: MonoBehaviour
         else if (phase == 13) // fade out
         {
             transform.parent.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, phase_frame_count / 100f);
-            audio_manager.Loop("gym_sound", 1 - phase_frame_count / 100f);
+            audio_manager.Play("gym_sound", 1 - phase_frame_count / 100f, true);
 
             if (phase_frame_count == 100)
             {
@@ -162,7 +162,7 @@ public class coach_2: MonoBehaviour
                 GameObject next_UI_new = Instantiate(next_UI);
                 next_UI_new.transform.SetParent(transform.parent);
                 next_UI_new.transform.position = new Vector3(960, 540, 0);
-                audio_manager.Loop("samanthas_theme", 1);
+                audio_manager.Play("samanthas_theme", 1, true);
                 audio_manager.Stop("gym_sound");
                 Destroy(gameObject);
             }

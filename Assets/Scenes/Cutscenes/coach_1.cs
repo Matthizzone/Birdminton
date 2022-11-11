@@ -116,6 +116,14 @@ public class coach_1: MonoBehaviour
                 GameObject next_UI_new = Instantiate(next_UI);
                 next_UI_new.transform.SetParent(transform.parent);
                 next_UI_new.transform.position = new Vector3(960, 540, 0);
+                audio_manager.Stop("gym_sound");
+                audio_manager.Play("bass", 1, true);
+                audio_manager.Play("choir", 0, true);
+                audio_manager.Play("drums", 0, true);
+                audio_manager.Play("epiano", 0, true);
+                audio_manager.Play("extra_perc", 0, true);
+                audio_manager.Play("regpiano", 0, true);
+                audio_manager.Play("synth", 0, true);
                 Destroy(gameObject);
             }
             circle_change--;

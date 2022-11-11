@@ -91,46 +91,51 @@ public class tutorial : MonoBehaviour
     {
         if (a_enabled)
         {
-            if (phase == 1)
+            if (phase == 1) // hit B
             {
                 shuttle.GetComponent<shuttle>().set_towards_left(true);
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, false, true, false, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
             }
-            else if (phase == 3)
+            else if (phase == 3) // time B
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, false, true, false, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
             }
-            else if (phase == 5)
+            else if (phase == 5) // move
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, false, false, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
+                audio_manager.Play("epiano", 1, true);
             }
-            else if (phase == 7)
+            else if (phase == 7) // move and time B
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, true, false, false);
+                audio_manager.Play("extra_perc", 1, true);
             }
-            else if (phase == 11 || phase == 13)
+            else if (phase == 11 || phase == 13) // top box, bottom box
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, true, false, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
+                audio_manager.Play("synth", 1, true);
             }
-            else if (phase == 15)
+            else if (phase == 15) // hit A
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, false, true, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
+                audio_manager.Play("regpiano", 1, true);
             }
-            else if (phase == 19)
+            else if (phase == 19) // full
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, true, true, true, false);
+                audio_manager.Play("choir", 1, true);
             }
             phase_frame_count = 0;
             characters = 0;
@@ -166,6 +171,7 @@ public class tutorial : MonoBehaviour
                 transform.Find("Dialogue").gameObject.SetActive(true);
                 controls.enable_some(false, false, false, false, false, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(false);
+                audio_manager.Play("drums", 1, true);
                 phase++;
             }
 
@@ -385,6 +391,14 @@ public class tutorial : MonoBehaviour
                 GameObject.Find("Cameras").transform.Find("game_cam").gameObject.SetActive(false);
                 GameObject.Find("UI").transform.Find("Game").gameObject.SetActive(false);
                 Volume volume = GameObject.Find("Global Volume").GetComponent<Volume>();
+                audio_manager.Stop("bass");
+                audio_manager.Stop("drums");
+                audio_manager.Stop("epiano");
+                audio_manager.Stop("extra_perc");
+                audio_manager.Stop("synth");
+                audio_manager.Stop("regpiano");
+                audio_manager.Stop("choir");
+                audio_manager.Play("gym_sound", 1, true);
                 DepthOfField tmp;
                 if (volume.profile.TryGet<DepthOfField>(out tmp))
                 {

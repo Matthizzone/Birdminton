@@ -34,7 +34,7 @@ public class penguin_anim : MonoBehaviour
         if (transform.parent.parent.GetComponent<Controls>().get_swing_commit() < 0) target_angle = new Vector3(-rb.velocity.z, 0, rb.velocity.x);
         if (transform.parent.parent.GetComponent<Controls>().get_serving()) target_angle = Vector3.right;
 
-        target_angle = Vector3.RotateTowards(transform.forward, target_angle, 0.2f, 0);
+        target_angle = Vector3.RotateTowards(transform.forward, target_angle, 12 * Time.deltaTime, 0);
         target_angle.y = 0;
 
         /* more relaxed angle when not your turn
@@ -69,7 +69,7 @@ public class penguin_anim : MonoBehaviour
         look_dir = Vector3.RotateTowards(
             transform.forward,
             look_dir,
-            Mathf.Deg2Rad * 45, // Note we multiply by Mathf.Deg2Rad here to convert degrees to radians
+            Mathf.Deg2Rad * 45, // Multiply by Mathf.Deg2Rad here to convert degrees to radians
             0
         );
 

@@ -154,7 +154,7 @@ public class Sam1 : MonoBehaviour
         else if (phase == 13) // fade out
         {
             transform.parent.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, phase_frame_count / 100f);
-            audio_manager.Loop("samanthas_theme", 1 - phase_frame_count / 100f);
+            audio_manager.Play("samanthas_theme", 1 - phase_frame_count / 100f, true);
 
             if (phase_frame_count == 100)
             {
@@ -163,7 +163,7 @@ public class Sam1 : MonoBehaviour
                 next_UI_new.transform.position = new Vector3(960, 540, 0);
                 transform.parent.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, 0);
                 audio_manager.Stop("samanthas_theme");
-                audio_manager.Loop("credits", 1);
+                audio_manager.Play("credits", 1, true);
                 Destroy(gameObject);
             }
         }

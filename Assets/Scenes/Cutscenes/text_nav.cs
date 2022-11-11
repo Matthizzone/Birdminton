@@ -274,7 +274,7 @@ public class text_nav : MonoBehaviour
         GameObject n = Instantiate(next_scene);
         n.transform.SetParent(transform.parent);
         n.transform.position = new Vector3(960, 540, 0);
-        audio_manager.GetComponent<audio_manager>().Loop("gym_sound", 1);
+        audio_manager.GetComponent<audio_manager>().Play("gym_sound", 1, true);
         SceneManager.LoadScene("Court", LoadSceneMode.Additive);
         SceneManager.UnloadSceneAsync("UI Only");
     }

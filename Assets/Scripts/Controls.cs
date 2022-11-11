@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Controls : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class Controls : MonoBehaviour
     int b_pressed_ago = 0;
     bool mishit = false;
     bool serving = true;
+    float prev_dash = -10; // time stamp of previous dash
+    float energy = 1; // 0 - 1
 
     bool jump_enabled = true;
     bool dash_enabled = true;
@@ -118,25 +121,25 @@ public class Controls : MonoBehaviour
         Vector3 leftstick_unit_length = new Vector2(left_stick.x, left_stick.y);
         if (leftstick_unit_length.magnitude > 1) leftstick_unit_length = leftstick_unit_length.normalized;
 
-        float move_power = 0.3f;
-        float friction = 0.91f;
+        float move_power = 20;
+        float friction = 0.0035f;
 
         if (serving)
         {
-            move_power = 1;
-            friction = 0.7f;
+            move_power = 60;
+            friction = 0.0000001f;
         }
         else if (!grounded)
         {
-            move_power = 0.05f;
-            friction = 0.984f;
+            move_power = 3;
+            friction = 0.38f;
         }
 
         if (!move_enabled) move_power = 0;
 
-        flat_vel += transform.right * leftstick_unit_length.x * move_power;
-        flat_vel += transform.forward * leftstick_unit_length.y * move_power;
-        flat_vel *= friction;
+        flat_vel += transform.right * leftstick_unit_length.x * move_power * Time.deltaTime;
+        flat_vel += transform.forward * leftstick_unit_length.y * move_power * Time.deltaTime;
+        flat_vel *= Mathf.Pow(friction, Time.deltaTime);
 
         rb.velocity = new Vector3(flat_vel.x, rb.velocity.y, flat_vel.z);
 
@@ -200,13 +203,28 @@ public class Controls : MonoBehaviour
             swing_commit--;
             if (swing_commit == 0) swing_commit_type = 1;
         }
+
+        // -------------------------------- UI UPDATES --------------------------------------
+
+        GameObject energy_bar = UI.transform.Find("Game").Find("Energy").Find("bg").Find("Bar").gameObject;
+
+        energy_bar.GetComponent<RectTransform>().sizeDelta = new Vector2(40, 400 * energy);
+        energy_bar.GetComponent<Image>().color = Color.Lerp(new Color(1, 0, 0), new Color(0, 1, 0), energy);
+
+        if (energy < 1) energy += Time.deltaTime * temp1;
     }
 
     void A()
     {
         if (b_pressed_ago > 0)
         {
-            if (smash_enabled) HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
+            if (smash_enabled)
+            {
+                if (energy < 0.4f) mishit = true;
+                else energy -= 0.40f;
+
+                HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash\
+            }
             b_pressed_ago = 0;
         }
         else
@@ -217,7 +235,13 @@ public class Controls : MonoBehaviour
     {
         if (a_pressed_ago > 0)
         {
-            if (smash_enabled) HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
+            if (smash_enabled)
+            {
+                if (energy < 0.4f) mishit = true;
+                else energy -= 0.40f;
+
+                HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
+            }
             a_pressed_ago = 0;
         }
         else
@@ -226,7 +250,7 @@ public class Controls : MonoBehaviour
 
     void X()
     {
-        if (dash_enabled && grounded)
+        if (dash_enabled && grounded && Time.time - prev_dash > 0.5f && energy > 0.40f)
         {
             swing_commit_type = 4;
             anim.SetInteger("shot_type", swing_commit_type);
@@ -234,16 +258,19 @@ public class Controls : MonoBehaviour
             audio_manager.Play("leap", 0.4f);
             rb.velocity += new Vector3(left_stick.x, 0, left_stick.y) * 5; // dash power
             swing_commit = 20;
+            prev_dash = Time.time;
+            energy -= 0.40f;
         }
     }
 
     void Y()
     {
-        if (jump_enabled && grounded && !serving)
+        if (jump_enabled && grounded && !serving && energy > 0.40f)
         {
             rb.velocity *= 0.5f;
             rb.velocity = new Vector3(rb.velocity.x, 4f, rb.velocity.z);
             anim.SetTrigger("jump");
+            energy -= 0.40f;
         }
     }
 

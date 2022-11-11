@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class fps_setter : MonoBehaviour
 {
+    public int FPS = 60;
+
     void Awake()
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = FPS;
     }
 
     void Update()
