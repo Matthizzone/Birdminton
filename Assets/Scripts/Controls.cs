@@ -148,12 +148,12 @@ public class Controls : MonoBehaviour
         if (a_pressed_ago > 0)
         {
             a_pressed_ago--;
-            if (drop_enabled && a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 5, 100); // drop
+            if (drop_enabled && a_pressed_ago == 0) HitShuttle(new Vector3(1, 0, left_stick.y * 3), 5); // drop
         }
         if (b_pressed_ago > 0)
         {
             b_pressed_ago--;
-            if (clear_enabled && b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15, 100); // clear
+            if (clear_enabled && b_pressed_ago == 0) HitShuttle(new Vector3(6, 0, left_stick.y * 3), 15); // clear
         }
 
 
@@ -206,12 +206,19 @@ public class Controls : MonoBehaviour
 
         // -------------------------------- UI UPDATES --------------------------------------
 
-        GameObject energy_bar = UI.transform.Find("Game").Find("Energy").Find("bg").Find("Bar").gameObject;
+        GameObject energy_bar = UI.transform.Find("GameUI").Find("Energy").Find("bg").Find("Bar").gameObject;
 
         energy_bar.GetComponent<RectTransform>().sizeDelta = new Vector2(40, 400 * energy);
-        energy_bar.GetComponent<Image>().color = Color.Lerp(new Color(1, 0, 0), new Color(0, 1, 0), energy);
 
-        if (energy < 1) energy += Time.deltaTime * temp1;
+        Color bar_color = new Color(0, 1, 0); // R -> Y -> G lerp
+        if (energy < 0.5f)
+            bar_color =  Color.Lerp(new Color(1, 0, 0), new Color(1, 1, 0), energy * 2);
+        else
+            bar_color = Color.Lerp(new Color(1, 1, 0), new Color(0, 1, 0), energy * 2 - 1);
+
+        energy_bar.GetComponent<Image>().color = bar_color;
+
+        if (energy < 1) energy += Time.deltaTime * 0.1f;
     }
 
     void A()
@@ -223,7 +230,7 @@ public class Controls : MonoBehaviour
                 if (energy < 0.4f) mishit = true;
                 else energy -= 0.40f;
 
-                HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash\
+                HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash\
             }
             b_pressed_ago = 0;
         }
@@ -240,7 +247,7 @@ public class Controls : MonoBehaviour
                 if (energy < 0.4f) mishit = true;
                 else energy -= 0.40f;
 
-                HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10, 100); // smash
+                HitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash
             }
             a_pressed_ago = 0;
         }
@@ -250,27 +257,29 @@ public class Controls : MonoBehaviour
 
     void X()
     {
-        if (dash_enabled && grounded && Time.time - prev_dash > 0.5f && energy > 0.40f)
+        if (dash_enabled && grounded && Time.time - prev_dash > 0.5f)
         {
             swing_commit_type = 4;
             anim.SetInteger("shot_type", swing_commit_type);
             anim.SetTrigger("swing");
             audio_manager.Play("leap", 0.4f);
-            rb.velocity += new Vector3(left_stick.x, 0, left_stick.y) * 5; // dash power
+            rb.velocity += new Vector3(left_stick.x, 0, left_stick.y) * Mathf.Min(1, energy / 0.4f) * 5; // dash power
             swing_commit = 20;
             prev_dash = Time.time;
-            energy -= 0.40f;
+            if (energy > 0.4f) energy -= 0.40f;
+            else energy = 0;
         }
     }
 
     void Y()
     {
-        if (jump_enabled && grounded && !serving && energy > 0.40f)
+        if (jump_enabled && grounded && !serving && energy > 0.1f)
         {
             rb.velocity *= 0.5f;
-            rb.velocity = new Vector3(rb.velocity.x, 4f, rb.velocity.z);
+            rb.velocity = new Vector3(rb.velocity.x, 4f * Mathf.Min(1, energy / 0.4f), rb.velocity.z); // jump power
             anim.SetTrigger("jump");
-            energy -= 0.40f;
+            if (energy > 0.4f) energy -= 0.40f;
+            else energy = 0;
         }
     }
 
@@ -334,7 +343,7 @@ public class Controls : MonoBehaviour
         input.Gameplay.Disable();
     }
 
-    void HitShuttle(Vector3 target_point, float v_y, float quality)
+    void HitShuttle(Vector3 target_point, float v_y)
     {
         if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
             && (shuttle.GetComponent<shuttle>().get_in_flight() || serving) && shuttle.GetComponent<shuttle>().get_towards_left())
@@ -355,12 +364,8 @@ public class Controls : MonoBehaviour
                 if (v_y < 0) audio_manager.Play("hit hard");
                 else audio_manager.Play("hit medium");
             }
-            shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y);
+            shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y, mishit);
             shuttle.GetComponent<shuttle>().set_towards_left(false);
-            shuttle.GetComponent<TrailRenderer>().enabled = !mishit;
-            shuttle.GetComponent<TrailRenderer>().Clear();
-            shuttle.transform.Find("mishit_line").gameObject.SetActive(mishit);
-            shuttle.transform.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
 
             // reset values
             mishit = false;
@@ -396,5 +401,10 @@ public class Controls : MonoBehaviour
         clear_enabled = clear;
         drop_enabled = drop;
         smash_enabled = smash;
+    }
+
+    public void begin_serve()
+    {
+        serving = true;
     }
 }

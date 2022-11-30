@@ -53,7 +53,7 @@ public class shuttle : MonoBehaviour
         return floor_r_0 + angle * get_radius(t - t_0) + Vector3.up * get_height(t - t_0);
     }
 
-    public void set_trajectory(Vector3 new_r_0, Vector3 new_r_f, float v_0_y)
+    public void set_trajectory(Vector3 new_r_0, Vector3 new_r_f, float v_0_y, bool mishit)
     {
         // clean r_f
         r_f = new_r_f;
@@ -89,15 +89,25 @@ public class shuttle : MonoBehaviour
         // initiate new flight
         t_0 = Time.time;
 
+        // dropspot
         GameObject.Find("dropspot").GetComponent<dropspot>().new_trajectory(find_height_zero() + Time.time, r_f);
         firework.transform.position = r_0;
 
+        // particle burst
         ParticleSystem.EmitParams emitOverride = new ParticleSystem.EmitParams();
         emitOverride.startLifetime = 0.5f;
         firework.GetComponent<ParticleSystem>().Emit(emitOverride, 150);
+
+        // variables
         in_flight = true;
         GetComponent<shuttle>().enabled = true;
         rb.velocity = Vector3.zero;
+
+        // handle mishit
+        GetComponent<TrailRenderer>().enabled = !mishit;
+        GetComponent<TrailRenderer>().Clear();
+        transform.Find("mishit_line").gameObject.SetActive(mishit);
+        transform.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
     }
 
     float get_radius(float t)
@@ -125,6 +135,12 @@ public class shuttle : MonoBehaviour
 
     float get_height_deriv(float t)
     {
+        return -g / b * (1 - Mathf.Exp(-b * t)) + v_0.y * Mathf.Exp(-b * t);
+    }
+
+    public float get_height_deriv_2(float t) // includes t_0
+    {
+        t -= t_0;
         return -g / b * (1 - Mathf.Exp(-b * t)) + v_0.y * Mathf.Exp(-b * t);
     }
 
@@ -198,6 +214,8 @@ public class shuttle : MonoBehaviour
 
         if (Mathf.Abs(flat_vel.y) > 7) audio_manager.Play("bounce_hard", 0.4f);
         else audio_manager.Play("bounce_soft", 0.2f);
+
+        GameObject.Find("GameUI").GetComponent<game_manager>().ShuttleDied(transform.position.x > 0);
 
         rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
     }

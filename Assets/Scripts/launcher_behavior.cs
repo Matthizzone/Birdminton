@@ -4,41 +4,25 @@ using UnityEngine;
 
 public class launcher_behavior : MonoBehaviour
 {
-    public GameObject birdie;
-    public GameObject player;
-    public GameObject star;
-    public GameObject console;
-    public float launch_power = 15f;
+    GameObject shuttle;
 
     private float shot_countdown = 3;
+
+    private void Start()
+    {
+        shuttle = GameObject.Find("shuttle");
+    }
 
     void Update()
     {
         shot_countdown -= Time.deltaTime;
         if (shot_countdown <= 0)
         {
-            Vector3 landing_spot = player.transform.position;
+            Vector3 landing_spot = new Vector3(-3.5f, 0, 0);
             landing_spot.y = 0;
-            ShootBirdie(landing_spot, 10);
-            shot_countdown = 5;
+            shuttle.GetComponent<shuttle>().set_trajectory(transform.position, landing_spot, 15, false);
+            shuttle.GetComponent<shuttle>().set_towards_left(true);
+            shot_countdown = 3;
         }
-    }
-
-    void ShootBirdie(Vector3 landing_spot, float height)
-    {
-        float dist = Vector3.Distance(transform.position, landing_spot);
-        Vector3 launch_angle = landing_spot - transform.position;
-        launch_angle.y = 0;
-        launch_angle = launch_angle.normalized;
-        launch_angle += Vector3.up;
-        launch_angle = launch_angle.normalized;
-
-        birdie.transform.position = transform.position;
-        birdie.GetComponent<Rigidbody>().velocity = launch_angle * 2 * dist;
-        // new_birdie.GetComponent<birdie_behavior>().console = console;
-
-        star.transform.position = landing_spot;
-
-        gameObject.GetComponent<AudioSource>().Play();
     }
 }

@@ -389,7 +389,7 @@ public class tutorial : MonoBehaviour
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 GameObject.Find("Cameras").transform.Find("cutscene_cam").gameObject.SetActive(true);
                 GameObject.Find("Cameras").transform.Find("game_cam").gameObject.SetActive(false);
-                GameObject.Find("UI").transform.Find("Game").gameObject.SetActive(false);
+                GameObject.Find("UI").transform.Find("GameUI").gameObject.SetActive(false);
                 Volume volume = GameObject.Find("Global Volume").GetComponent<Volume>();
                 audio_manager.Stop("bass");
                 audio_manager.Stop("drums");

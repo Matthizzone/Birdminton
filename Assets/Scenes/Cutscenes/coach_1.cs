@@ -99,7 +99,7 @@ public class coach_1: MonoBehaviour
             {
                 GameObject.Find("Cameras").transform.Find("cutscene_cam").gameObject.SetActive(false);
                 GameObject.Find("Cameras").transform.Find("game_cam").gameObject.SetActive(true);
-                GameObject.Find("UI").transform.Find("Game").gameObject.SetActive(true);
+                GameObject.Find("UI").transform.Find("GameUI").gameObject.SetActive(true);
                 Volume volume = GameObject.Find("Global Volume").GetComponent<Volume>();
                 DepthOfField tmp;
                 if (volume.profile.TryGet<DepthOfField>(out tmp))

@@ -29,7 +29,8 @@ public class helpful_hubert : MonoBehaviour
         shuttle.GetComponent<shuttle>().set_trajectory(
             shuttle.transform.position,
             where,
-            15);
+            15,
+            false);
         audio_manager.Play("hit soft", 1);
         shuttle.GetComponent<TrailRenderer>().enabled = true;
         shuttle.GetComponent<TrailRenderer>().Clear();
