@@ -298,7 +298,7 @@ public class player_controls : MonoBehaviour
 
     void Y()
     {
-        if (jump_enabled && grounded && !serving && energy > 0.1f)
+        if (jump_enabled && grounded && !serving && energy > 0.2f)
         {
             rb.velocity *= 0.5f;
             rb.velocity = new Vector3(rb.velocity.x, 4f * Mathf.Min(1, energy / 0.4f), rb.velocity.z); // jump power

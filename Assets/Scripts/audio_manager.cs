@@ -60,4 +60,16 @@ public class audio_manager : MonoBehaviour
             print("clip not found: " + clip_name);
         }
     }
+
+    public void Play_SFX(string clip_name)
+    {
+        try
+        {
+            SFX[clip_name].Play();
+        }
+        catch (KeyNotFoundException)
+        {
+            print("clip not found: " + clip_name);
+        }
+    }
 }
