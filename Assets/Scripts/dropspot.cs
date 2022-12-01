@@ -34,7 +34,7 @@ public class dropspot : MonoBehaviour
     public void new_trajectory(float land_time, Vector3 land_point)
     {
         _land_time = land_time;
-        transform.position = land_point;
+        transform.localPosition = land_point;
         _hit_time = Time.time;
     }
 }

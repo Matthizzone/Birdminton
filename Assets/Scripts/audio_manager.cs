@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class audio_manager : MonoBehaviour
 {
-    IDictionary<string, AudioSource> SFX = new Dictionary<string, AudioSource>();
+    IDictionary<string, AudioSource> Sounds = new Dictionary<string, AudioSource>();
 
     private void Awake()
     {
-        AudioClip[] SFX_list = Resources.LoadAll<AudioClip>("SFX");
+        AudioClip[] SFX_list = Resources.LoadAll<AudioClip>("Sounds");
 
         foreach (var sfx in SFX_list)
         {
-            SFX[sfx.name] = gameObject.AddComponent<AudioSource>();
-            SFX[sfx.name].clip = sfx;
-            SFX[sfx.name].playOnAwake = false;
+            Sounds[sfx.name] = gameObject.AddComponent<AudioSource>();
+            Sounds[sfx.name].clip = sfx;
+            Sounds[sfx.name].playOnAwake = false;
         }
     }
 
@@ -22,15 +22,15 @@ public class audio_manager : MonoBehaviour
     {
         try
         {
-            if (SFX[clip_name].isPlaying)
+            if (Sounds[clip_name].isPlaying)
             {
-                SFX[clip_name].volume = volume;
+                Sounds[clip_name].volume = volume;
             }
             else
             {
-                SFX[clip_name].Play();
-                SFX[clip_name].loop = loop;
-                SFX[clip_name].volume = volume;
+                Sounds[clip_name].Play();
+                Sounds[clip_name].loop = loop;
+                Sounds[clip_name].volume = volume;
             }
         }
         catch (KeyNotFoundException)
@@ -53,7 +53,7 @@ public class audio_manager : MonoBehaviour
     {
         try
         {
-            SFX[clip_name].Stop();
+            Sounds[clip_name].Stop();
         }
         catch (KeyNotFoundException)
         {
@@ -65,7 +65,7 @@ public class audio_manager : MonoBehaviour
     {
         try
         {
-            SFX[clip_name].Play();
+            Sounds[clip_name].Play();
         }
         catch (KeyNotFoundException)
         {

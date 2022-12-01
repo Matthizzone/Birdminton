@@ -134,26 +134,57 @@ public class main_menu : MonoBehaviour
 
         if (m == 0) // Story Mode
         {
-            GameObject IS = Instantiate(intro_story);
+            GameObject IS = Instantiate(Resources.Load("Prefabs/UI/IntroStory")) as GameObject;
             IS.transform.SetParent(transform.parent.Find("CutsceneUI"));
             IS.transform.localPosition = Vector3.zero;
 
-            SceneManager.LoadScene("UI Only", LoadSceneMode.Additive);
+            Destroy(gameObject);
         }
         else if (m == 1) // Level 9 CPU
         {
-            SceneManager.LoadSceneAsync("Court", LoadSceneMode.Additive);
-            GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(true);
-            GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(false);
-            transform.parent.Find("GameUI").gameObject.SetActive(true);
+            StartCoroutine(load_level_9_CPU());
         }
         else if (m == 2) // Easy Serves
         {
-            SceneManager.LoadSceneAsync("Court", LoadSceneMode.Additive);
-            GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(false);
-            GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(true);
-            transform.parent.Find("GameUI").gameObject.SetActive(true);
+            StartCoroutine(load_easy_serves());
         }
+    }
+
+    IEnumerator load_level_9_CPU()
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Court", LoadSceneMode.Additive);
+
+        // Wait until the asynchronous scene fully loads
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+
+        // scene finished loading
+        GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(true);
+        GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(false);
+        transform.parent.Find("GameUI").gameObject.SetActive(true);
+
+        Destroy(gameObject);
+    }
+
+    IEnumerator load_easy_serves()
+    {
+        // The Application loads the Scene in the background as the current Scene runs.
+        // This is particularly good for creating loading screens.
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Court", LoadSceneMode.Additive);
+
+        // Wait until the asynchronous scene fully loads
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+
+        // scene finished loading
+        GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(false);
+        GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(true);
+        transform.parent.Find("GameUI").gameObject.SetActive(true);
 
         Destroy(gameObject);
     }

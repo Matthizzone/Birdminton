@@ -20,7 +20,7 @@ public class launcher_behavior : MonoBehaviour
         {
             Vector3 landing_spot = new Vector3(-3.5f, 0, 0);
             landing_spot.y = 0;
-            shuttle.GetComponent<shuttle>().set_trajectory(transform.position, landing_spot, 15, false);
+            shuttle.GetComponent<shuttle>().set_trajectory(transform.localPosition, landing_spot, 15, false);
             shuttle.GetComponent<shuttle>().set_towards_left(true);
             shot_countdown = 3;
         }

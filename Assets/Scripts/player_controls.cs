@@ -22,7 +22,7 @@ public class player_controls : MonoBehaviour
 
     Rigidbody rb;
     Animator anim;
-    GameObject shuttle;
+    Transform shuttle;
     GameObject UI;
     audio_manager audio_manager;
 
@@ -109,7 +109,7 @@ public class player_controls : MonoBehaviour
         anim = transform.Find("model").GetComponent<Animator>();
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         UI = GameObject.Find("UI");
-        shuttle = GameObject.Find("shuttle");
+        shuttle = GameObject.Find("Game").transform.Find("shuttle");
 
         // set needed values
         prev_head_rotation = transform.Find("model").Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head").transform.rotation;
@@ -312,7 +312,7 @@ public class player_controls : MonoBehaviour
 
     void TryHitShuttle(Vector3 target_point, float v_y)
     {
-        if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
+        if (Vector3.Distance(shuttle.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
             && (shuttle.GetComponent<shuttle>().get_in_flight() || serving) && shuttle.GetComponent<shuttle>().get_towards_left())
         {
             if (!endlag_check_swing())
@@ -322,15 +322,15 @@ public class player_controls : MonoBehaviour
                 {
                     swing_type = 4; // jumpsmash
                 }
-                else if (shuttle.GetComponent<shuttle>().get_pos(Time.time).z < transform.Find("hitbox").position.z - 0.3f)
+                else if (shuttle.localPosition.z < transform.Find("hitbox").localPosition.z - 0.3f)
                 {
                     swing_type = 0; // forehand
                 }
-                else if (shuttle.GetComponent<shuttle>().get_pos(Time.time).z > transform.Find("hitbox").position.z + 0.3f)
+                else if (shuttle.localPosition.z > transform.Find("hitbox").localPosition.z + 0.3f)
                 {
                     swing_type = 1; // backhand
                 }
-                else if(shuttle.GetComponent<shuttle>().get_pos(Time.time).y > transform.Find("hitbox").position.y + 0.9f)
+                else if(shuttle.localPosition.y > transform.Find("hitbox").localPosition.y + 0.9f)
                 {
                     swing_type = 2; // clear
                 }
@@ -353,14 +353,14 @@ public class player_controls : MonoBehaviour
                 if (v_y < 0) audio_manager.Play("hit hard");
                 else audio_manager.Play("hit medium");
             }
-            shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y, mishit);
+            shuttle.GetComponent<shuttle>().set_trajectory(shuttle.localPosition, target_point, v_y, mishit);
             shuttle.GetComponent<shuttle>().set_towards_left(false);
 
             // reset values
             mishit = false;
             serving = false;
         }
-        else if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x
+        else if (Vector3.Distance(shuttle.localPosition, transform.Find("hitbox").localPosition) < transform.Find("hitbox").localScale.x
             && shuttle.GetComponent<shuttle>().get_towards_left())
         {
             mishit = true;
@@ -376,7 +376,7 @@ public class player_controls : MonoBehaviour
 
     void PointEye(Transform eye)
     {
-        Vector3 look_vector = shuttle.transform.position - eye.position;
+        Vector3 look_vector = shuttle.position - eye.position;
 
         float left_right_angle = Vector3.Angle(
             eye.up,
@@ -414,6 +414,16 @@ public class player_controls : MonoBehaviour
 
         RaycastHit floor_point;
         return Physics.Raycast(transform.position + Vector3.up * 0.05f, Vector3.down, out floor_point, 0.1f, layerMask);
+    }
+
+    public void enable_some(bool jump, bool dash, bool move, bool clear, bool drop, bool smash)
+    {
+        jump_enabled = jump;
+        dash_enabled = dash;
+        move_enabled = move;
+        clear_enabled = clear;
+        drop_enabled = drop;
+        smash_enabled = smash;
     }
 
     private void OnEnable()

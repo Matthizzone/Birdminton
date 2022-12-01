@@ -11,7 +11,7 @@ public class tutorial : MonoBehaviour
 {
     Input input;
     audio_manager audio_manager;
-    Controls controls;
+    player_controls controls;
     GameObject shuttle;
 
     public GameObject next_UI;
@@ -77,7 +77,7 @@ public class tutorial : MonoBehaviour
     {
         shuttle = GameObject.Find("shuttle");
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
-        controls = GameObject.Find("Players").transform.Find("player").GetComponent<Controls>();
+        controls = GameObject.Find("Players").transform.Find("player").GetComponent<player_controls>();
         controls.enable_some(false, false, false, false, false, false);
     }
 

@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class text_nav : MonoBehaviour
 {
     Input input;
     GameObject audio_manager;
-
-    public GameObject next_scene;
 
     Vector2 left_stick;
     Vector2 right_stick;
@@ -96,10 +93,14 @@ public class text_nav : MonoBehaviour
             }
             else
             {
-                if (character < 0.1f && phrase_i < phrases.Length)
-                    audio_manager.GetComponent<audio_manager>().Play("text");
-                else if (character >= phrases[phrase_i].Length)
+                if (phrase_i >= phrases.Length || character >= phrases[phrase_i].Length)
+                {
                     audio_manager.GetComponent<audio_manager>().Stop("text");
+                }
+                else if (character < 0.1f && phrase_i < phrases.Length)
+                {
+                    audio_manager.GetComponent<audio_manager>().Play("text");
+                }
 
                 if (phrase_i < phrases.Length)
                 {
@@ -271,12 +272,14 @@ public class text_nav : MonoBehaviour
         audio_manager.GetComponent<audio_manager>().Stop("text");
         audio_manager.GetComponent<audio_manager>().Play("court_intro");
         Destroy(transform.Find("Curtain").gameObject);
-        GameObject n = Instantiate(next_scene);
-        n.transform.SetParent(transform.parent);
-        n.transform.position = new Vector3(960, 540, 0);
+        
+        // load the court
+        GameObject gym = Instantiate(Resources.Load("Prefabs/Gym")) as GameObject;
         audio_manager.GetComponent<audio_manager>().Play("gym_sound", 1, true);
-        SceneManager.LoadScene("Court", LoadSceneMode.Additive);
-        SceneManager.UnloadSceneAsync("UI Only");
+
+        GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(true);
+        GameObject.Find("Players").transform.Find("enemy_left").gameObject.SetActive(true);
+        GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(false);
     }
 
     void Select()

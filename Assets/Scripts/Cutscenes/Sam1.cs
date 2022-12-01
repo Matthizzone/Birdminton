@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class coach_2: MonoBehaviour
+public class Sam1 : MonoBehaviour
 {
     Input input;
     audio_manager audio_manager;
     Controls controls;
-    GameObject shuttle;
 
     public GameObject next_UI;
 
@@ -21,7 +19,7 @@ public class coach_2: MonoBehaviour
     Vector2 triggers;
 
     float characters = 0;
-    float character_speed = 0.4f;
+    float character_speed = 1; // change back to 0.4f
     int phase = 0;
     int phase_frame_count = 0;
     bool a_enabled = false;
@@ -73,7 +71,6 @@ public class coach_2: MonoBehaviour
 
     private void Start()
     {
-        shuttle = GameObject.Find("shuttle");
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
     }
 
@@ -85,85 +82,87 @@ public class coach_2: MonoBehaviour
 
     void handle_transition()
     {
-        if (phase == 0) // text
+        if (phase == 0) // curtain fade out
         {
-            a_enabled = fill_text("Coach", "I’m impressed, you picked that up quickly for a beginner!");
-            return;
+            transform.parent.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, 1 - phase_frame_count / 100f);
+            if (phase_frame_count == 100)
+            {
+                phase++;
+            }
         }
         else if (phase == 1) // text
         {
-            a_enabled = fill_text("Coach", "I’ll give you the 11th spot.");
+            a_enabled = fill_text("Marvin", "How are you, birdie?");
             return;
         }
         else if (phase == 2) // text
         {
-            a_enabled = fill_text("Coop", "What about me coach!");
+            a_enabled = fill_text("Samantha", "I’m ok, but I’m worried about you.");
             return;
         }
         else if (phase == 3) // text
         {
-            a_enabled = fill_text("Coach", "You’ve earned yourself the 12th spot.");
+            a_enabled = fill_text("Marvin", "Why’s that?");
             return;
         }
         else if (phase == 4) // text
         {
-            a_enabled = fill_text("Coop", "Nice!");
+            a_enabled = fill_text("Samantha", "You don’t seem to be listening to me today.");
             return;
         }
         else if (phase == 5) // text
         {
-            a_enabled = fill_text("Grey", "What are ya doin' coach? These guys have no fundamentals.");
+            a_enabled = fill_text("Marvin", "Sorry, I’m just so excited about practice tomorrow.");
             return;
         }
         else if (phase == 6) // text
         {
-            a_enabled = fill_text("Coach", "We all start somewhere.");
+            a_enabled = fill_text("Samantha", "That’s all?");
             return;
         }
         else if (phase == 7) // text
         {
-            a_enabled = fill_text("Grey", "I’d be surprised if you don’t trip over your own shoelaces.");
+            a_enabled = fill_text("Marvin", "Well this Grey guy also said something that bugged me a little.");
             return;
         }
         else if (phase == 8) // text
         {
-            a_enabled = fill_text("Coach", "HEY. This is not how we treat the team.");
+            a_enabled = fill_text("Samantha", "Ah that’s what it is.");
             return;
         }
         else if (phase == 9) // text
         {
-            a_enabled = fill_text("Grey", "Whatever, I’ll see ya all tomorrow.");
+            a_enabled = fill_text("Marvin", "Sorry about today. I promise I’ll be focused once I take this all in.");
             return;
         }
         else if (phase == 10) // text
         {
-            a_enabled = fill_text("Coach", "...");
+            a_enabled = fill_text("Samantha", "Ok, I trust you.");
             return;
         }
         else if (phase == 11) // text
         {
-            a_enabled = fill_text("Coach", "Never mind him, he’s just eager.");
+            a_enabled = fill_text("Marvin", "I love you!");
             return;
         }
         else if (phase == 12) // text
         {
-            a_enabled = fill_text("Coach", "I’ll see you boys back here tomorrow.");
+            a_enabled = fill_text("Samantha", "Love you too!");
             return;
         }
         else if (phase == 13) // fade out
         {
             transform.parent.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, phase_frame_count / 100f);
-            audio_manager.Play("gym_sound", 1 - phase_frame_count / 100f, true);
+            audio_manager.Play("samanthas_theme", 1 - phase_frame_count / 100f, true);
 
             if (phase_frame_count == 100)
             {
-                SceneManager.UnloadSceneAsync("Court");
-                SceneManager.LoadScene("UI Only", LoadSceneMode.Additive);
                 GameObject next_UI_new = Instantiate(next_UI);
                 next_UI_new.transform.SetParent(transform.parent);
                 next_UI_new.transform.position = new Vector3(960, 540, 0);
-                audio_manager.Play("samanthas_theme", 1, true);
-                audio_manager.Stop("gym_sound");
+                transform.parent.parent.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, 0);
+                audio_manager.Stop("samanthas_theme");
+                audio_manager.Play("credits", 1, true);
                 Destroy(gameObject);
             }
         }
@@ -182,21 +181,9 @@ public class coach_2: MonoBehaviour
             return true;
         }
 
-        transform.Find("Dialogue").Find("Speaker").GetComponent<TMPro.TMP_Text>().text = speaker;
-        transform.Find("Dialogue").Find("Speaker").GetComponent<TMPro.TMP_Text>().color = get_speaker_color(speaker);
-
-        transform.Find("Dialogue").Find("Line").GetComponent<TMPro.TMP_Text>().text = line.Substring(0, Mathf.RoundToInt(characters));
+        transform.Find(speaker).GetComponent<TMPro.TMP_Text>().text = line.Substring(0, Mathf.RoundToInt(characters));
 
         return false;
-    }
-
-    Color get_speaker_color(string speaker)
-    {
-        if (speaker.Equals("Coach")) return new Color(1, 0, 0);
-        else if (speaker.Equals("Coop")) return new Color(0, 0, 1);
-        else if (speaker.Equals("Hubert")) return new Color(0, 1, 1);
-        else if (speaker.Equals("Grey")) return new Color(0.4f, 0.4f, 0.4f);
-        else return new Color(1, 1, 1);
     }
 
     void A()
@@ -206,6 +193,8 @@ public class coach_2: MonoBehaviour
             phase_frame_count = 0;
             characters = 0;
             a_enabled = false;
+            transform.Find("Marvin").GetComponent<TMPro.TMP_Text>().text = "";
+            transform.Find("Samantha").GetComponent<TMPro.TMP_Text>().text = "";
 
             phase++;
         }

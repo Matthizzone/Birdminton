@@ -14,6 +14,6 @@ public class camera_behavior : MonoBehaviour
     {
         Vector3 target_pos = shuttle.GetComponent<shuttle>().get_land_point() / pull + new Vector3(0, 8, -10);
 
-        transform.position = Vector3.Lerp(transform.position, target_pos, 1 - Mathf.Pow(smoothing, Time.deltaTime));
+        transform.localPosition = Vector3.Lerp(transform.localPosition, target_pos, 1 - Mathf.Pow(smoothing, Time.deltaTime));
     }
 }

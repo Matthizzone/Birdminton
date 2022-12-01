@@ -6,12 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Permanent.unity
-    guid: 44354fcdc047b5d49aad7f5860e3ee56
-  - enabled: 1
-    path: Assets/Scenes/UI Only.unity
-    guid: 06a3d2d5f7c0d7d46accb49b08803ce7
-  - enabled: 1
     path: Assets/Scenes/Court.unity
     guid: f0092921b5821f9469e39ab913ff3a29
   m_configObjects:

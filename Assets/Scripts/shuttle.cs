@@ -37,7 +37,7 @@ public class shuttle : MonoBehaviour
         // plug in t
         if (in_flight)
         {
-            transform.position = get_pos(Time.time);
+            transform.localPosition = get_pos(Time.time);
 
             Vector3 look_vector = transform.position - prev_loc;
             transform.LookAt(transform.position + look_vector);
@@ -49,6 +49,8 @@ public class shuttle : MonoBehaviour
 
     public Vector3 get_pos(float t)
     {
+        // gets localposition for Game (badminton court)
+
         Vector3 floor_r_0 = new Vector3(r_0.x, 0, r_0.z);
         return floor_r_0 + angle * get_radius(t - t_0) + Vector3.up * get_height(t - t_0);
     }
@@ -62,7 +64,7 @@ public class shuttle : MonoBehaviour
         // update internal variables
         r_0 = new_r_0;
         v_0 = new Vector3(32, v_0_y);
-        transform.position = r_0;
+        transform.localPosition = r_0;
 
         Vector3 floor_r_0 = new Vector3(r_0.x, 0, r_0.z);
         float goal_radius = Vector3.Distance(floor_r_0, r_f);
@@ -210,12 +212,12 @@ public class shuttle : MonoBehaviour
 
         Vector3 flat_vel = (get_pos(Time.time) - get_pos(Time.time - 0.1f)) * 10;
         flat_vel.y = -flat_vel.y;
-        rb.velocity = flat_vel * 0.35f;
+        rb.velocity = transform.parent.TransformVector(flat_vel * 0.35f);
 
         if (Mathf.Abs(flat_vel.y) > 7) audio_manager.Play("bounce_hard", 0.4f);
         else audio_manager.Play("bounce_soft", 0.2f);
 
-        GameObject.Find("GameUI").GetComponent<game_manager>().ShuttleDied(transform.position.x > 0);
+        GameObject.Find("UI").transform.Find("GameUI").GetComponent<game_manager>().ShuttleDied(transform.position.x > 0);
 
         rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
     }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -165,6 +164,7 @@ public class coach_1: MonoBehaviour
                 if (camera_change == 0)
                 {
                     transform.Find("Dialogue").gameObject.SetActive(true);
+                    audio_manager.Play("coach", 1, true);
                 }
                 camera_change--;
             }
@@ -193,6 +193,7 @@ public class coach_1: MonoBehaviour
                 {
                     transform.Find("Dialogue").gameObject.SetActive(false);
                     audio_manager.Stop("text");
+                    audio_manager.Stop("coach");
                     circle_change = 150;
                 }
             }
