@@ -78,7 +78,6 @@ public class tutorial : MonoBehaviour
         shuttle = GameObject.Find("shuttle");
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         controls = GameObject.Find("Players").transform.Find("player").GetComponent<player_controls>();
-        controls.enable_some(false, false, false, false, false, false);
     }
 
     private void Update()
@@ -387,8 +386,8 @@ public class tutorial : MonoBehaviour
             if (phase_frame_count == 75)
             {
                 transform.Find("Dialogue").gameObject.SetActive(false);
-                GameObject.Find("Cameras").transform.Find("cutscene_cam").gameObject.SetActive(true);
-                GameObject.Find("Cameras").transform.Find("game_cam").gameObject.SetActive(false);
+                GameObject.Find("Gathering").transform.Find("cutscene_cam").gameObject.SetActive(true);
+                GameObject.Find("Game").transform.Find("game_cam").gameObject.SetActive(false);
                 GameObject.Find("UI").transform.Find("GameUI").gameObject.SetActive(false);
                 Volume volume = GameObject.Find("Global Volume").GetComponent<Volume>();
                 audio_manager.Stop("bass");

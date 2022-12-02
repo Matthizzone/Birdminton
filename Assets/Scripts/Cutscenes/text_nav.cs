@@ -39,9 +39,9 @@ public class text_nav : MonoBehaviour
         audio_manager = GameObject.Find("audio_manager");
 
         input.Gameplay.A.performed += ctx => A();
-        input.Gameplay.B.performed += ctx => B();
-        input.Gameplay.X.performed += ctx => X();
-        input.Gameplay.Y.performed += ctx => Y();
+        //input.Gameplay.B.performed += ctx => B();
+        //input.Gameplay.X.performed += ctx => X();
+        //input.Gameplay.Y.performed += ctx => Y();
 
         input.Gameplay.Start.performed += ctx => Start_down();
         input.Gameplay.Select.performed += ctx => Select();
@@ -54,7 +54,7 @@ public class text_nav : MonoBehaviour
         input.Gameplay.LeftStickLeft.canceled += ctx => left_stick.x = 0;
         input.Gameplay.LeftStickRight.performed += ctx => left_stick.x = ctx.ReadValue<float>();
         input.Gameplay.LeftStickRight.canceled += ctx => left_stick.x = 0;
-        input.Gameplay.LeftStickPress.performed += ctx => LeftStickPress();
+        //input.Gameplay.LeftStickPress.performed += ctx => LeftStickPress();
 
         input.Gameplay.RightStickUp.performed += ctx => right_stick.y = ctx.ReadValue<float>();
         input.Gameplay.RightStickUp.canceled += ctx => right_stick.y = 0;
@@ -64,19 +64,19 @@ public class text_nav : MonoBehaviour
         input.Gameplay.RightStickLeft.canceled += ctx => right_stick.x = 0;
         input.Gameplay.RightStickRight.performed += ctx => right_stick.x = ctx.ReadValue<float>();
         input.Gameplay.RightStickRight.canceled += ctx => right_stick.x = 0;
-        input.Gameplay.RightStickPress.performed += ctx => RightStickPress();
+        //input.Gameplay.RightStickPress.performed += ctx => RightStickPress();
 
         input.Gameplay.LT.performed += ctx => triggers.x = ctx.ReadValue<float>();
         input.Gameplay.LT.canceled += ctx => triggers.x = 0;
-        input.Gameplay.LB.performed += ctx => LB();
+        //input.Gameplay.LB.performed += ctx => LB();
         input.Gameplay.RT.performed += ctx => triggers.y = ctx.ReadValue<float>();
         input.Gameplay.RT.canceled += ctx => triggers.y = 0;
-        input.Gameplay.RB.performed += ctx => RB();
+        //input.Gameplay.RB.performed += ctx => RB();
 
-        input.Gameplay.DUp.performed += ctx => D_up();
-        input.Gameplay.DDown.performed += ctx => D_down();
-        input.Gameplay.DLeft.performed += ctx => D_left();
-        input.Gameplay.DRight.performed += ctx => D_right();
+        //input.Gameplay.DUp.performed += ctx => D_up();
+        //input.Gameplay.DDown.performed += ctx => D_down();
+        //input.Gameplay.DLeft.performed += ctx => D_left();
+        //input.Gameplay.DRight.performed += ctx => D_right();
     }
 
     private void Update()
@@ -196,61 +196,6 @@ public class text_nav : MonoBehaviour
         }
     }
 
-    void B()
-    {
-        print("b down");
-    }
-
-    void X()
-    {
-        print("x down");
-    }
-
-    void Y()
-    {
-        print("y down");
-    }
-
-    void D_down()
-    {
-        print("D down");
-    }
-
-    void D_up()
-    {
-        print("D up");
-    }
-
-    void D_left()
-    {
-        print("D left");
-    }
-
-    void D_right()
-    {
-        print("D right");
-    }
-
-    void LeftStickPress()
-    {
-        print("left stick press");
-    }
-
-    void RightStickPress()
-    {
-        print("right stick press");
-    }
-
-    void LB()
-    {
-        print("LB");
-    }
-
-    void RB()
-    {
-        print("RB");
-    }
-
     void Start_down()
     {
         if (phrase_i < 9)
@@ -271,15 +216,38 @@ public class text_nav : MonoBehaviour
         transform.Find("logo").GetComponent<RawImage>().enabled = false;
         audio_manager.GetComponent<audio_manager>().Stop("text");
         audio_manager.GetComponent<audio_manager>().Play("court_intro");
-        Destroy(transform.Find("Curtain").gameObject);
-        
+
+        transform.parent.parent.Find("black_bg").GetComponent<Image>().color = new Color(0, 0, 0, 0);
+        transform.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, 0);
+
         // load the court
-        GameObject gym = Instantiate(Resources.Load("Prefabs/Gym")) as GameObject;
+        instantiate_prefab("Gym", Vector3.zero);
         audio_manager.GetComponent<audio_manager>().Play("gym_sound", 1, true);
+
+        instantiate_prefab("Game", Vector3.zero);
+        instantiate_prefab("Gathering", new Vector3(-4.5f, 0, -8f));
 
         GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(true);
         GameObject.Find("Players").transform.Find("enemy_left").gameObject.SetActive(true);
         GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(false);
+
+        instantiate_UI("UI/Coach1", Vector3.zero, transform.parent);
+    }
+
+    void instantiate_prefab(string name, Vector3 where)
+    {
+        GameObject newfab = Instantiate(Resources.Load("Prefabs/" + name)) as GameObject;
+        newfab.name = name;
+        newfab.transform.position = where;
+    }
+
+    void instantiate_UI(string name, Vector3 where, Transform parent)
+    {
+        GameObject newfab = Instantiate(Resources.Load("Prefabs/" + name)) as GameObject;
+        newfab.name = name;
+        newfab.transform.position = where;
+        newfab.transform.SetParent(parent);
+        newfab.transform.localPosition = Vector3.zero;
     }
 
     void Select()

@@ -59,6 +59,8 @@ public class player_controls : MonoBehaviour
     private void Awake()
     {
         input = new Input();
+        rb = GetComponent<Rigidbody>();
+        anim = transform.Find("model").GetComponent<Animator>();
 
         input.Gameplay.A.performed += ctx => A();
         input.Gameplay.B.performed += ctx => B();
@@ -105,8 +107,6 @@ public class player_controls : MonoBehaviour
     {
         // Set global references
 
-        rb = GetComponent<Rigidbody>();
-        anim = transform.Find("model").GetComponent<Animator>();
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         UI = GameObject.Find("UI");
         shuttle = GameObject.Find("Game").transform.Find("shuttle");
@@ -170,13 +170,19 @@ public class player_controls : MonoBehaviour
             if (clear_enabled && b_pressed_ago == 0) TryHitShuttle(new Vector3(6, 0, left_stick.y * 3), 15); // clear
         }
 
+        // ---------------------------------- SERVING ------------------------------------
+        if (serving)
+        {
+            shuttle.transform.position = transform.Find("model").Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("shoulder.l").Find("arm.l").Find("forearm.l").Find("forearm.l_end").position;
+        }
+
         // --------------------------------- ANIMATIONS ----------------------------------
 
         if (rb.velocity.magnitude > 0.1f || (swing_type != 3 && Time.time - prev_swing < swing_endlag)) // turning
         {
             // face where?
             Vector3 target_angle = rb.velocity;
-            if (endlag_check_swing()) {
+            if (endlag_check_swing() && move_enabled) {
                 if (swing_type == 0) target_angle = -Vector3.forward; // forehand
                 if (swing_type == 1) target_angle = Vector3.forward; // backhand
                 if (swing_type == 2) target_angle = -Vector3.right; // clear
@@ -318,7 +324,11 @@ public class player_controls : MonoBehaviour
             if (!endlag_check_swing())
             {
                 // get swing type
-                if (!grounded)
+                if (serving)
+                {
+                    swing_type = 5; // serve
+                }
+                else if (!grounded)
                 {
                     swing_type = 4; // jumpsmash
                 }
@@ -330,13 +340,13 @@ public class player_controls : MonoBehaviour
                 {
                     swing_type = 1; // backhand
                 }
-                else if(shuttle.localPosition.y > transform.Find("hitbox").localPosition.y + 0.9f)
+                else if (shuttle.localPosition.y > transform.Find("hitbox").localPosition.y + 0.9f)
                 {
                     swing_type = 2; // clear
                 }
                 else
                 {
-                    swing_type = 3; // lift
+                    swing_type = 3; // lift (kinda like default)
                 }
 
                 anim.SetInteger("type", swing_type);
@@ -424,6 +434,12 @@ public class player_controls : MonoBehaviour
         clear_enabled = clear;
         drop_enabled = drop;
         smash_enabled = smash;
+    }
+
+    public void begin_serve()
+    {
+        serving = true;
+        anim.SetTrigger("serve");
     }
 
     private void OnEnable()

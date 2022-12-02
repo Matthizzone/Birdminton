@@ -96,8 +96,8 @@ public class coach_1: MonoBehaviour
             GameObject.Find("CircleMask").GetComponent<RectTransform>().sizeDelta = new Vector2(sizeDelt, sizeDelt);
             if (circle_change == 75)
             {
-                GameObject.Find("Cameras").transform.Find("cutscene_cam").gameObject.SetActive(false);
-                GameObject.Find("Cameras").transform.Find("game_cam").gameObject.SetActive(true);
+                GameObject.Find("Gathering").transform.Find("cutscene_cam").gameObject.SetActive(false);
+                GameObject.Find("Game").transform.Find("game_cam").gameObject.SetActive(true);
                 GameObject.Find("UI").transform.Find("GameUI").gameObject.SetActive(true);
                 Volume volume = GameObject.Find("Global Volume").GetComponent<Volume>();
                 DepthOfField tmp;
@@ -107,7 +107,11 @@ public class coach_1: MonoBehaviour
                 }
                 GameObject.Find("Players").transform.Find("enemy_left").gameObject.SetActive(false);
                 GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(false);
+
                 GameObject.Find("Players").transform.Find("player").gameObject.SetActive(true);
+                GameObject.Find("Players").transform.Find("player").GetComponent<player_controls>().enable_some(false, false, false, false, false, false);
+                GameObject.Find("Players").transform.Find("player").GetComponent<player_controls>().begin_serve();
+
                 GameObject.Find("Players").transform.Find("hubert").gameObject.SetActive(true);
             }
             if (circle_change == 0)
@@ -151,8 +155,8 @@ public class coach_1: MonoBehaviour
                 GameObject.Find("DoubleCurtainBottom").GetComponent<RectTransform>().sizeDelta = new Vector2(2000, 600 - 20 * Mathf.Abs(camera_change - 30));
                 if (camera_change == 30)
                 {
-                    GameObject.Find("Cameras").transform.Find("establishcam").gameObject.SetActive(false);
-                    GameObject.Find("Cameras").transform.Find("cutscene_cam").gameObject.SetActive(true);
+                    GameObject.Find("Gym").transform.Find("establishcam_pivot").gameObject.SetActive(false);
+                    GameObject.Find("Gathering").transform.Find("cutscene_cam").gameObject.SetActive(true);
 
                     Volume volume = GameObject.Find("Global Volume").GetComponent<Volume>();
                     DepthOfField tmp;

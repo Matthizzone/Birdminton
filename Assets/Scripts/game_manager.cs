@@ -25,6 +25,7 @@ public class game_manager : MonoBehaviour
             if (scale > 0.5f)
             {
                 GameObject.Find("player").GetComponent<Controls>().begin_serve();
+                print("SERVE SERVE SERVE SERVE");
                 transform.Find("logo_transition").GetComponent<Image>().color = new Color(1, 1, 1, 1 - (scale - 0.5f) * 2);
                 transform.Find("logo_transition").Find("birdminton").GetComponent<RawImage>().color = new Color(0.4f, 0.4f, 1, 1 - (scale - 0.5f) * 2);
             }
