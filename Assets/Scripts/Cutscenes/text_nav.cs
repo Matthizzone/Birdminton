@@ -217,7 +217,6 @@ public class text_nav : MonoBehaviour
         audio_manager.GetComponent<audio_manager>().Stop("text");
         audio_manager.GetComponent<audio_manager>().Play("court_intro");
 
-        transform.parent.parent.Find("black_bg").GetComponent<Image>().color = new Color(0, 0, 0, 0);
         transform.Find("Curtain").GetComponent<Image>().color = new Color(0, 0, 0, 0);
 
         // load the court

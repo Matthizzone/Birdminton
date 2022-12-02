@@ -134,59 +134,48 @@ public class main_menu : MonoBehaviour
 
         if (m == 0) // Story Mode
         {
-            GameObject IS = Instantiate(Resources.Load("Prefabs/UI/IntroStory")) as GameObject;
+            GameObject IS = create_prefab("UI/IntroStory");
             IS.transform.SetParent(transform.parent.Find("CutsceneUI"));
             IS.transform.localPosition = Vector3.zero;
-
-            Destroy(gameObject);
         }
         else if (m == 1) // Level 9 CPU
         {
-            StartCoroutine(load_level_9_CPU());
+            GameObject gym = create_prefab("Gym");
+            gym.transform.position = Vector3.zero;
+            gym.transform.Find("establishcam_pivot").gameObject.SetActive(false);
+
+            GameObject game = create_prefab("Game");
+            game.transform.position = Vector3.zero;
+            game.transform.Find("game_cam").gameObject.SetActive(true);
+            game.transform.Find("Players").Find("enemy_right").gameObject.SetActive(true);
+            game.transform.Find("Players").Find("player").gameObject.SetActive(true);
+
+            transform.parent.Find("GameUI").gameObject.SetActive(true);
         }
         else if (m == 2) // Easy Serves
         {
-            StartCoroutine(load_easy_serves());
+            GameObject gym = create_prefab("Gym");
+            gym.transform.position = Vector3.zero;
+            gym.transform.Find("establishcam_pivot").gameObject.SetActive(false);
+
+            GameObject game = create_prefab("Game");
+            game.transform.position = Vector3.zero;
+            game.transform.Find("game_cam").gameObject.SetActive(true);
+            game.transform.Find("Players").Find("launcher").gameObject.SetActive(true);
+            game.transform.Find("Players").Find("player").gameObject.SetActive(true);
+
+            transform.parent.Find("GameUI").gameObject.SetActive(true);
         }
-    }
-
-    IEnumerator load_level_9_CPU()
-    {
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Court", LoadSceneMode.Additive);
-
-        // Wait until the asynchronous scene fully loads
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
-
-        // scene finished loading
-        GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(true);
-        GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(false);
-        transform.parent.Find("GameUI").gameObject.SetActive(true);
 
         Destroy(gameObject);
     }
 
-    IEnumerator load_easy_serves()
+    GameObject create_prefab(string name)
     {
-        // The Application loads the Scene in the background as the current Scene runs.
-        // This is particularly good for creating loading screens.
-
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Court", LoadSceneMode.Additive);
-
-        // Wait until the asynchronous scene fully loads
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
-
-        // scene finished loading
-        GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(false);
-        GameObject.Find("Players").transform.Find("launcher").gameObject.SetActive(true);
-        transform.parent.Find("GameUI").gameObject.SetActive(true);
-
-        Destroy(gameObject);
+        GameObject newfab = Instantiate(Resources.Load("Prefabs/" + name)) as GameObject;
+        int start_index = name.LastIndexOf('/') + 1;
+        newfab.name = name.Substring(start_index, name.Length - start_index);
+        return newfab;
     }
 
     private void OnEnable()

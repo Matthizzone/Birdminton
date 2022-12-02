@@ -237,7 +237,7 @@ public class player_controls : MonoBehaviour
         head.rotation = Quaternion.Slerp(
             prev_head_rotation,
             Quaternion.LookRotation(look_dir, transform.up),
-            1 - Mathf.Exp(-5 * Time.deltaTime)
+            1 - Mathf.Exp(-20 * Time.deltaTime)
         );
         prev_head_rotation = head.transform.rotation;
 
@@ -318,6 +318,8 @@ public class player_controls : MonoBehaviour
 
     void TryHitShuttle(Vector3 target_point, float v_y)
     {
+        if (Time.time - prev_swing < swing_endlag) return;
+
         if (Vector3.Distance(shuttle.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
             && (shuttle.GetComponent<shuttle>().get_in_flight() || serving) && shuttle.GetComponent<shuttle>().get_towards_left())
         {
@@ -370,11 +372,28 @@ public class player_controls : MonoBehaviour
             mishit = false;
             serving = false;
         }
-        else if (Vector3.Distance(shuttle.localPosition, transform.Find("hitbox").localPosition) < transform.Find("hitbox").localScale.x
-            && shuttle.GetComponent<shuttle>().get_towards_left())
+        else
         {
-            mishit = true;
+            // whiff
+            audio_manager.PlayMany("woosh");
+            if (!grounded) anim.SetInteger("type", 4); // jumpsmash
+            else
+            {
+                int random_type = Mathf.FloorToInt(Random.Range(1, 3.999f)); // lift, forehand, backhand, but not clear, bc of the turnaround
+                if (random_type == 2) random_type = 0;
+                anim.SetInteger("type", random_type);
+            }
+            anim.SetTrigger("swing");
+            prev_swing = Time.time - swing_endlag / 2; // only half the endlag to be more generous towards whiffs
+
+            if (Vector3.Distance(shuttle.localPosition, transform.Find("hitbox").localPosition) < transform.Find("hitbox").localScale.x
+                && shuttle.GetComponent<shuttle>().get_towards_left())
+            {
+                mishit = true;
+            }
         }
+
+        rb.velocity *= 0.5f;
     }
 
     bool endlag_check_swing()

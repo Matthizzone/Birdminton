@@ -72,4 +72,27 @@ public class audio_manager : MonoBehaviour
             print("clip not found: " + clip_name);
         }
     }
+
+    public void PlayMany(string clip_name)
+    {
+        AudioSource AS;
+
+        try
+        {
+            AS = Sounds[clip_name];
+        }
+        catch (KeyNotFoundException)
+        {
+            print("clip not found: " + clip_name);
+            return;
+        }
+
+        GameObject mini_speaker = new GameObject();
+        mini_speaker.AddComponent<AudioSource>();
+        mini_speaker.GetComponent<AudioSource>().clip = AS.clip;
+        mini_speaker.GetComponent<AudioSource>().Play();
+        mini_speaker.name = clip_name;
+        mini_speaker.AddComponent<SFX_death>();
+        mini_speaker.transform.parent = transform;
+    }
 }
