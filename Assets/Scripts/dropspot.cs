@@ -8,6 +8,7 @@ public class dropspot : MonoBehaviour
 
     float _hit_time;
     float _land_time;
+    Vector3 _land_point;
 
     void Start()
     {
@@ -29,12 +30,14 @@ public class dropspot : MonoBehaviour
         {
             GetComponent<MeshRenderer>().material.color = Color.clear;
         }
+
+        transform.localPosition = _land_point;
     }
 
     public void new_trajectory(float land_time, Vector3 land_point)
     {
         _land_time = land_time;
-        transform.localPosition = land_point;
+        _land_point = land_point;
         _hit_time = Time.time;
     }
 }

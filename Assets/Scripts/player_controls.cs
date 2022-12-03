@@ -22,7 +22,6 @@ public class player_controls : MonoBehaviour
 
     Rigidbody rb;
     Animator anim;
-    Transform shuttle;
     GameObject UI;
     audio_manager audio_manager;
 
@@ -44,6 +43,7 @@ public class player_controls : MonoBehaviour
 
     float swing_endlag = 0.8f;
     float dash_endlag = 0.5f;
+    float mishit_window = 1.2f; // time since last swing where mishit will happen
 
     // ON/OFF
 
@@ -109,7 +109,6 @@ public class player_controls : MonoBehaviour
 
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         UI = GameObject.Find("UI");
-        shuttle = GameObject.Find("Game").transform.Find("shuttle");
 
         // set needed values
         prev_head_rotation = transform.Find("model").Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head").transform.rotation;
@@ -162,18 +161,12 @@ public class player_controls : MonoBehaviour
         if (a_pressed_ago > 0)
         {
             a_pressed_ago--;
-            if (drop_enabled && a_pressed_ago == 0) TryHitShuttle(new Vector3(1, 0, left_stick.y * 3), 5); // drop
+            if (drop_enabled && a_pressed_ago == 0) TryHitShuttles(new Vector3(1, 0, left_stick.y * 3), 5); // drop
         }
         if (b_pressed_ago > 0)
         {
             b_pressed_ago--;
-            if (clear_enabled && b_pressed_ago == 0) TryHitShuttle(new Vector3(6, 0, left_stick.y * 3), 15); // clear
-        }
-
-        // ---------------------------------- SERVING ------------------------------------
-        if (serving)
-        {
-            shuttle.transform.position = transform.Find("model").Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("shoulder.l").Find("arm.l").Find("forearm.l").Find("forearm.l_end").position;
+            if (clear_enabled && b_pressed_ago == 0) TryHitShuttles(new Vector3(6, 0, left_stick.y * 3), 15); // clear
         }
 
         // --------------------------------- ANIMATIONS ----------------------------------
@@ -220,10 +213,12 @@ public class player_controls : MonoBehaviour
 
     private void LateUpdate()
     {
-        // head
+        GameObject closest_active_shuttle = get_closest_active_shuttle();
+        Vector3 look_pos = closest_active_shuttle != null ? closest_active_shuttle.transform.Find("model").position : transform.forward;
 
+        // head
         Transform head = transform.Find("model").Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("head");
-        Vector3 look_dir = shuttle.transform.position - head.position;
+        Vector3 look_dir = look_pos - head.position;
 
         // Apply angle limit
         look_dir = Vector3.RotateTowards(
@@ -242,8 +237,8 @@ public class player_controls : MonoBehaviour
         prev_head_rotation = head.transform.rotation;
 
         // eye
-        PointEye(head.Find("left_eye"));
-        PointEye(head.Find("right_eye"));
+        PointEye(head.Find("left_eye"), look_pos);
+        PointEye(head.Find("right_eye"), look_pos);
     }
 
     void A()
@@ -258,7 +253,7 @@ public class player_controls : MonoBehaviour
                     else energy -= 0.40f;
                 }
 
-                TryHitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash\
+                TryHitShuttles(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash\
             }
             b_pressed_ago = 0;
         }
@@ -278,7 +273,7 @@ public class player_controls : MonoBehaviour
                     else energy -= 0.40f;
                 }
 
-                TryHitShuttle(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash
+                TryHitShuttles(new Vector3(3.5f, 0, left_stick.y * 3), -10); // smash
             }
             a_pressed_ago = 0;
         }
@@ -316,84 +311,102 @@ public class player_controls : MonoBehaviour
         }
     }
 
-    void TryHitShuttle(Vector3 target_point, float v_y)
+    void TryHitShuttles(Vector3 target_point, float v_y)
     {
         if (Time.time - prev_swing < swing_endlag) return;
 
-        if (Vector3.Distance(shuttle.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
-            && (shuttle.GetComponent<shuttle>().get_in_flight() || serving) && shuttle.GetComponent<shuttle>().get_towards_left())
+        mishit = Time.time - prev_swing < mishit_window;
+
+        bool at_least_one = false;
+
+        // loop through all the shuttles and if any are in range, hit em
+        foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
         {
-            if (!endlag_check_swing())
+            // if 1) in range, 2) in flight, 3) towards left
+            if (Vector3.Distance(child.Find("model").position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
+                && child.GetComponent<shuttle>().get_in_flight() && child.GetComponent<shuttle>().get_towards_left())
             {
-                // get swing type
-                if (serving)
-                {
-                    swing_type = 5; // serve
-                }
-                else if (!grounded)
-                {
-                    swing_type = 4; // jumpsmash
-                }
-                else if (shuttle.localPosition.z < transform.Find("hitbox").localPosition.z - 0.3f)
-                {
-                    swing_type = 0; // forehand
-                }
-                else if (shuttle.localPosition.z > transform.Find("hitbox").localPosition.z + 0.3f)
-                {
-                    swing_type = 1; // backhand
-                }
-                else if (shuttle.localPosition.y > transform.Find("hitbox").localPosition.y + 0.9f)
-                {
-                    swing_type = 2; // clear
-                }
-                else
-                {
-                    swing_type = 3; // lift (kinda like default)
-                }
-
-                anim.SetInteger("type", swing_type);
-                anim.SetTrigger("swing");
-                prev_swing = Time.time;
+                at_least_one = true;
+                HitShuttle(child, target_point, v_y);
             }
-            if (mishit)
-            {
-                v_y = 20;
-                audio_manager.Play("mishit");
-            }
-            else
-            {
-                if (v_y < 0) audio_manager.Play("hit hard");
-                else audio_manager.Play("hit medium");
-            }
-            shuttle.GetComponent<shuttle>().set_trajectory(shuttle.localPosition, target_point, v_y, mishit);
-            shuttle.GetComponent<shuttle>().set_towards_left(false);
-
-            // reset values
-            mishit = false;
-            serving = false;
         }
-        else
-        {
-            // whiff
-            audio_manager.PlayMany("woosh");
-            if (!grounded) anim.SetInteger("type", 4); // jumpsmash
-            else
-            {
-                int random_type = Mathf.FloorToInt(Random.Range(1, 3.999f)); // lift, forehand, backhand, but not clear, bc of the turnaround
-                if (random_type == 2) random_type = 0;
-                anim.SetInteger("type", random_type);
-            }
-            anim.SetTrigger("swing");
-            prev_swing = Time.time - swing_endlag / 2; // only half the endlag to be more generous towards whiffs
 
-            if (Vector3.Distance(shuttle.localPosition, transform.Find("hitbox").localPosition) < transform.Find("hitbox").localScale.x
-                && shuttle.GetComponent<shuttle>().get_towards_left())
+        if (!at_least_one)
+        {
+            Whiff();
+
+            if (Time.time - prev_swing < mishit_window)
             {
                 mishit = true;
             }
         }
 
         rb.velocity *= 0.5f;
+    }
+
+    void HitShuttle(Transform shuttle, Vector3 target_point, float v_y)
+    {
+        // get swing type
+        if (serving)
+        {
+            swing_type = 5; // serve
+        }
+        else if (!grounded)
+        {
+            swing_type = 4; // jumpsmash
+        }
+        else if (shuttle.localPosition.z < transform.Find("hitbox").localPosition.z - 0.3f)
+        {
+            swing_type = 0; // forehand
+        }
+        else if (shuttle.localPosition.z > transform.Find("hitbox").localPosition.z + 0.3f)
+        {
+            swing_type = 1; // backhand
+        }
+        else if (shuttle.localPosition.y > transform.Find("hitbox").localPosition.y + 0.9f)
+        {
+            swing_type = 2; // clear
+        }
+        else
+        {
+            swing_type = 3; // lift (kinda like default)
+        }
+
+        anim.SetInteger("type", swing_type);
+        anim.SetTrigger("swing");
+        
+        if (mishit)
+        {
+            v_y = 20;
+            audio_manager.Play("mishit");
+        }
+        else
+        {
+            if (v_y < 0) audio_manager.Play("hit hard");
+            else audio_manager.Play("hit medium");
+        }
+
+        shuttle.GetComponent<shuttle>().set_trajectory(shuttle.Find("model").position, target_point, v_y, mishit);
+        shuttle.GetComponent<shuttle>().set_towards_left(false);
+
+        // reset values
+        mishit = false;
+        serving = false;
+        prev_swing = Time.time;
+    }
+
+    void Whiff()
+    {
+        audio_manager.PlayMany("woosh");
+        if (!grounded) anim.SetInteger("type", 4); // jumpsmash
+        else
+        {
+            int random_type = Mathf.FloorToInt(Random.Range(1, 3.999f)); // lift, forehand, backhand, but not clear, bc of the turnaround
+            if (random_type == 2) random_type = 0;
+            anim.SetInteger("type", random_type);
+        }
+        anim.SetTrigger("swing");
+        prev_swing = Time.time - swing_endlag / 2; // only half the endlag to be more generous towards whiffs
     }
 
     bool endlag_check_swing()
@@ -403,9 +416,9 @@ public class player_controls : MonoBehaviour
 
 
 
-    void PointEye(Transform eye)
+    void PointEye(Transform eye, Vector3 where)
     {
-        Vector3 look_vector = shuttle.position - eye.position;
+        Vector3 look_vector = where - eye.position;
 
         float left_right_angle = Vector3.Angle(
             eye.up,
@@ -445,6 +458,28 @@ public class player_controls : MonoBehaviour
         return Physics.Raycast(transform.position + Vector3.up * 0.05f, Vector3.down, out floor_point, 0.1f, layerMask);
     }
 
+    GameObject get_closest_active_shuttle()
+    {
+        // get the closest shuttle to the hitbox that is in flight.
+        float min_dist = float.PositiveInfinity;
+        GameObject closest_active_shuttle = null;
+
+        foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+        {
+            float test_dist = Vector3.Distance(child.Find("model").position, transform.Find("hitbox").position);
+
+            if (test_dist < min_dist && child.GetComponent<shuttle>().get_in_flight())
+            {
+                min_dist = test_dist;
+                closest_active_shuttle = child.gameObject;
+            }
+
+            //print(child.name);
+        }
+
+        return closest_active_shuttle;
+    }
+
     public void enable_some(bool jump, bool dash, bool move, bool clear, bool drop, bool smash)
     {
         jump_enabled = jump;
@@ -459,6 +494,16 @@ public class player_controls : MonoBehaviour
     {
         serving = true;
         anim.SetTrigger("serve");
+        GameObject new_shuttle = create_prefab("shuttle");
+        new_shuttle.transform.parent = transform.Find("model").Find("Armature").Find("pelvis").Find("torso").Find("chest").Find("shoulder.l").Find("arm.l").Find("forearm.l").Find("forearm.l_end");
+    }
+
+    GameObject create_prefab(string name)
+    {
+        GameObject newfab = Instantiate(Resources.Load("Prefabs/" + name)) as GameObject;
+        int start_index = name.LastIndexOf('/') + 1;
+        newfab.name = name.Substring(start_index, name.Length - start_index);
+        return newfab;
     }
 
     private void OnEnable()

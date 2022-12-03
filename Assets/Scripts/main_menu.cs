@@ -166,6 +166,20 @@ public class main_menu : MonoBehaviour
 
             transform.parent.Find("GameUI").gameObject.SetActive(true);
         }
+        else if (m == 3) // CPU against CPU
+        {
+            GameObject gym = create_prefab("Gym");
+            gym.transform.position = Vector3.zero;
+            gym.transform.Find("establishcam_pivot").gameObject.SetActive(false);
+
+            GameObject game = create_prefab("Game");
+            game.transform.position = Vector3.zero;
+            game.transform.Find("game_cam").gameObject.SetActive(true);
+            game.transform.Find("Players").Find("enemy_right").gameObject.SetActive(true);
+            game.transform.Find("Players").Find("enemy_left").gameObject.SetActive(true);
+
+            transform.parent.Find("GameUI").gameObject.SetActive(true);
+        }
 
         Destroy(gameObject);
     }

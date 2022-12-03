@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class shuttle : MonoBehaviour
 {
-    public GameObject firework;
     Rigidbody rb;
     audio_manager audio_manager;
+    Transform model;
 
     public float temp1 = 5;
     public float temp2 = 360;
@@ -26,10 +26,16 @@ public class shuttle : MonoBehaviour
     bool towards_left = true;
     bool in_flight = false;
 
+    private void Awake()
+    {
+        model = transform.Find("model");
+        rb = model.GetComponent<Rigidbody>();
+    }
+
     private void Start()
     {
-        rb = GetComponent<Rigidbody>();
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
+        model.Find("firework").GetComponent<ParticleSystem>().Stop();
     }
 
     void Update()
@@ -37,13 +43,27 @@ public class shuttle : MonoBehaviour
         // plug in t
         if (in_flight)
         {
-            transform.localPosition = get_pos(Time.time);
 
-            Vector3 look_vector = transform.position - prev_loc;
-            transform.LookAt(transform.position + look_vector);
-            prev_loc = transform.position;
+            model.localPosition = get_pos(Time.time);
+
+            Vector3 look_vector = model.position - prev_loc;
+            model.LookAt(model.position + look_vector);
+            prev_loc = model.position;
 
             if (get_pos(Time.time).y < 0.01f) kill_flight();
+        }
+
+        // dropspot
+        if (in_flight)
+        {
+            float scale = (Time.time - t_0) / find_height_zero(); // 0 -> 1
+
+            transform.Find("dropspot").localScale = Vector3.one * 200 * (1 - scale);
+            transform.Find("dropspot").GetComponent<MeshRenderer>().material.color = new Color(0.55f, 0.95f, 1, scale);
+        }
+        else
+        {
+            transform.Find("dropspot").GetComponent<MeshRenderer>().material.color = Color.clear;
         }
     }
 
@@ -64,7 +84,7 @@ public class shuttle : MonoBehaviour
         // update internal variables
         r_0 = new_r_0;
         v_0 = new Vector3(32, v_0_y);
-        transform.localPosition = r_0;
+        model.localPosition = r_0;
 
         Vector3 floor_r_0 = new Vector3(r_0.x, 0, r_0.z);
         float goal_radius = Vector3.Distance(floor_r_0, r_f);
@@ -91,14 +111,12 @@ public class shuttle : MonoBehaviour
         // initiate new flight
         t_0 = Time.time;
 
-        // dropspot
-        GameObject.Find("dropspot").GetComponent<dropspot>().new_trajectory(find_height_zero() + Time.time, r_f);
-        firework.transform.position = r_0;
+        // drop spot
+        transform.Find("dropspot").localPosition = get_land_point();
 
         // particle burst
-        ParticleSystem.EmitParams emitOverride = new ParticleSystem.EmitParams();
-        emitOverride.startLifetime = 0.5f;
-        firework.GetComponent<ParticleSystem>().Emit(emitOverride, 150);
+        model.Find("firework").GetComponent<ParticleSystem>().Stop();
+        model.Find("firework").GetComponent<ParticleSystem>().Play();
 
         // variables
         in_flight = true;
@@ -106,10 +124,10 @@ public class shuttle : MonoBehaviour
         rb.velocity = Vector3.zero;
 
         // handle mishit
-        GetComponent<TrailRenderer>().enabled = !mishit;
-        GetComponent<TrailRenderer>().Clear();
-        transform.Find("mishit_line").gameObject.SetActive(mishit);
-        transform.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
+        model.GetComponent<TrailRenderer>().enabled = !mishit;
+        model.GetComponent<TrailRenderer>().Clear();
+        model.Find("mishit_line").gameObject.SetActive(mishit);
+        model.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
     }
 
     float get_radius(float t)
@@ -210,16 +228,25 @@ public class shuttle : MonoBehaviour
         in_flight = false;
         GetComponent<shuttle>().enabled = false;
 
+        // make a bounce
         Vector3 flat_vel = (get_pos(Time.time) - get_pos(Time.time - 0.1f)) * 10;
         flat_vel.y = -flat_vel.y;
-        rb.velocity = transform.parent.TransformVector(flat_vel * 0.35f);
+        rb.velocity = transform.TransformVector(flat_vel * 0.35f);
+        rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+        rb.useGravity = true;
 
+        // sound
         if (Mathf.Abs(flat_vel.y) > 7) audio_manager.Play("bounce_hard", 0.4f);
         else audio_manager.Play("bounce_soft", 0.2f);
 
+        // score
         GameObject.Find("UI").transform.Find("GameUI").GetComponent<game_manager>().ShuttleDied(transform.position.x > 0);
 
-        rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+        // handle trails
+        model.GetComponent<TrailRenderer>().enabled = true;
+        model.GetComponent<TrailRenderer>().Clear();
+        model.Find("mishit_line").gameObject.SetActive(false);
+        model.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
     }
 
     public bool get_in_flight()

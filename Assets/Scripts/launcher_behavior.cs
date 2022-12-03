@@ -4,25 +4,41 @@ using UnityEngine;
 
 public class launcher_behavior : MonoBehaviour
 {
-    GameObject shuttle;
+    GameObject audio_manager;
 
-    private float shot_countdown = 3;
+    float shot_interval = 0.1f;
+    float prev_launch = 0;
 
     private void Start()
     {
-        shuttle = GameObject.Find("shuttle");
+        audio_manager = GameObject.Find("audio_manager");
     }
 
     void Update()
     {
-        shot_countdown -= Time.deltaTime;
-        if (shot_countdown <= 0)
+        if (Time.time - prev_launch > shot_interval)
         {
-            Vector3 landing_spot = new Vector3(-3.5f, 0, 0);
+            prev_launch = Time.time;
+
+            GameObject new_shuttle = create_prefab("shuttle");
+            new_shuttle.transform.position = Vector3.zero;
+            new_shuttle.transform.SetParent(GameObject.Find("Game").transform.Find("shuttles"));
+
+            //Vector3 landing_spot = new Vector3(-3.5f, 0, 0);
+            Vector3 landing_spot = new Vector3(-3.5f + Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
             landing_spot.y = 0;
-            shuttle.GetComponent<shuttle>().set_trajectory(transform.localPosition, landing_spot, 15, false);
-            shuttle.GetComponent<shuttle>().set_towards_left(true);
-            shot_countdown = 3;
+            new_shuttle.GetComponent<shuttle>().set_trajectory(transform.localPosition, landing_spot, 15, false);
+            new_shuttle.GetComponent<shuttle>().set_towards_left(true);
+
+            audio_manager.GetComponent<audio_manager>().PlayMany("launch");
         }
+    }
+
+    GameObject create_prefab(string name)
+    {
+        GameObject newfab = Instantiate(Resources.Load("Prefabs/" + name)) as GameObject;
+        int start_index = name.LastIndexOf('/') + 1;
+        newfab.name = name.Substring(start_index, name.Length - start_index);
+        return newfab;
     }
 }
