@@ -2,9 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class shuttle : MonoBehaviour
+public class shuttle_behavior : MonoBehaviour
 {
-    Rigidbody rb;
     audio_manager audio_manager;
     Transform model;
 
@@ -23,13 +22,12 @@ public class shuttle : MonoBehaviour
 
     Vector3 prev_loc = Vector3.zero; // store location from last from for lookat
 
-    bool towards_left = true;
+    bool towards_right = true;
     bool in_flight = false;
 
     private void Awake()
     {
         model = transform.Find("model");
-        rb = model.GetComponent<Rigidbody>();
     }
 
     private void Start()
@@ -43,7 +41,6 @@ public class shuttle : MonoBehaviour
         // plug in t
         if (in_flight)
         {
-
             model.localPosition = get_pos(Time.time);
 
             Vector3 look_vector = model.position - prev_loc;
@@ -118,10 +115,12 @@ public class shuttle : MonoBehaviour
         model.Find("firework").GetComponent<ParticleSystem>().Stop();
         model.Find("firework").GetComponent<ParticleSystem>().Play();
 
+        // camera update
+        GameObject.Find("Game").transform.Find("game_cam").GetComponent<camera_behavior>().set_landing_point(r_f);
+
         // variables
         in_flight = true;
-        GetComponent<shuttle>().enabled = true;
-        rb.velocity = Vector3.zero;
+        GetComponent<shuttle_behavior>().enabled = true;
 
         // handle mishit
         model.GetComponent<TrailRenderer>().enabled = !mishit;
@@ -214,23 +213,25 @@ public class shuttle : MonoBehaviour
         return t_0 + find_height_zero();
     }
 
-    public void set_towards_left(bool new_towards_player)
+    public void set_towards_right(bool new_towards_right)
     {
-        towards_left = new_towards_player;
+        towards_right = new_towards_right;
     }
-    public bool get_towards_left()
+    public bool get_towards_right()
     {
-        return towards_left;
+        return towards_right;
     }
 
     private void kill_flight()
     {
         in_flight = false;
-        GetComponent<shuttle>().enabled = false;
+        GetComponent<shuttle_behavior>().enabled = false;
 
         // make a bounce
         Vector3 flat_vel = (get_pos(Time.time) - get_pos(Time.time - 0.1f)) * 10;
         flat_vel.y = -flat_vel.y;
+
+        Rigidbody rb = gameObject.AddComponent<Rigidbody>();
         rb.velocity = transform.TransformVector(flat_vel * 0.35f);
         rb.angularVelocity = new Vector3(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
         rb.useGravity = true;
@@ -239,8 +240,8 @@ public class shuttle : MonoBehaviour
         if (Mathf.Abs(flat_vel.y) > 7) audio_manager.Play("bounce_hard", 0.4f);
         else audio_manager.Play("bounce_soft", 0.2f);
 
-        // score
-        GameObject.Find("UI").transform.Find("GameUI").GetComponent<game_manager>().ShuttleDied(transform.position.x > 0);
+        // inform game manager that a shuttle has hit the ground
+        GameObject.Find("Game").GetComponent<game_manager>().ShuttleDied(model.localPosition.x > 0);
 
         // handle trails
         model.GetComponent<TrailRenderer>().enabled = true;

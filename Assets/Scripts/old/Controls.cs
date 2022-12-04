@@ -159,16 +159,16 @@ public class Controls : MonoBehaviour
 
         // -------------------------------- SWING COMMITMENT ---------------------------------
 
-        if (shuttle.GetComponent<shuttle>().get_towards_left())
+        if (shuttle.GetComponent<shuttle_behavior>().get_towards_right())
         {
             Transform hitbox = transform.Find("hitbox");
             float t_add = 0.2f;
 
             Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
-            Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add);
+            Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle_behavior>().get_pos(Time.time + t_add);
 
             if (Vector3.Distance(future_shuttle_loc, future_hitbox_loc) < 1.5f &&
-                shuttle.GetComponent<shuttle>().get_towards_left())
+                shuttle.GetComponent<shuttle_behavior>().get_towards_right())
             {
                 // swing commit
                 if (swing_commit < 0)
@@ -346,7 +346,7 @@ public class Controls : MonoBehaviour
     void HitShuttle(Vector3 target_point, float v_y)
     {
         if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
-            && (shuttle.GetComponent<shuttle>().get_in_flight() || serving) && shuttle.GetComponent<shuttle>().get_towards_left())
+            && (shuttle.GetComponent<shuttle_behavior>().get_in_flight() || serving) && shuttle.GetComponent<shuttle_behavior>().get_towards_right())
         {
             if (swing_commit < 0)
             {
@@ -364,15 +364,15 @@ public class Controls : MonoBehaviour
                 if (v_y < 0) audio_manager.Play("hit hard");
                 else audio_manager.Play("hit medium");
             }
-            shuttle.GetComponent<shuttle>().set_trajectory(shuttle.transform.position, target_point, v_y, mishit);
-            shuttle.GetComponent<shuttle>().set_towards_left(false);
+            shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.transform.position, target_point, v_y, mishit);
+            shuttle.GetComponent<shuttle_behavior>().set_towards_right(false);
 
             // reset values
             mishit = false;
             serving = false;
         }
         else if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x
-            && shuttle.GetComponent<shuttle>().get_towards_left())
+            && shuttle.GetComponent<shuttle_behavior>().get_towards_right())
         {
             mishit = true;
         }

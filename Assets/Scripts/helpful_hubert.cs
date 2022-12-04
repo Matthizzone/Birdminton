@@ -24,9 +24,9 @@ public class helpful_hubert : MonoBehaviour
     public void hit_shuttle(Vector3 where)
     {
         shuttle.transform.position = transform.position;
-        shuttle.GetComponent<shuttle>().enabled = true;
-        shuttle.GetComponent<shuttle>().set_towards_left(true);
-        shuttle.GetComponent<shuttle>().set_trajectory(
+        shuttle.GetComponent<shuttle_behavior>().enabled = true;
+        shuttle.GetComponent<shuttle_behavior>().set_towards_right(true);
+        shuttle.GetComponent<shuttle_behavior>().set_trajectory(
             shuttle.transform.position,
             where,
             15,

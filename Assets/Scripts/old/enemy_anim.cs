@@ -39,7 +39,7 @@ public class enemy_anim : MonoBehaviour
         target_angle.y = 0;
 
         /* more relaxed angle when not your turn
-        if (!shuttle.GetComponent<shuttle>().get_towards_player())
+        if (!shuttle.GetComponent<shuttle_behavior>().get_towards_player())
         {
             float angle = Vector3.Angle(Vector3.right, target_angle) * Mathf.Sign(Vector3.Dot(Vector3.forward, target_angle));
             target_angle *= angle <= 180 && angle > 45 ? 1 : -1;

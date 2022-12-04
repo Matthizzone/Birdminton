@@ -6,7 +6,7 @@ public class launcher_behavior : MonoBehaviour
 {
     GameObject audio_manager;
 
-    float shot_interval = 0.1f;
+    float shot_interval = 2.5f;
     float prev_launch = 0;
 
     private void Start()
@@ -20,18 +20,24 @@ public class launcher_behavior : MonoBehaviour
         {
             prev_launch = Time.time;
 
-            GameObject new_shuttle = create_prefab("shuttle");
-            new_shuttle.transform.position = Vector3.zero;
-            new_shuttle.transform.SetParent(GameObject.Find("Game").transform.Find("shuttles"));
-
-            //Vector3 landing_spot = new Vector3(-3.5f, 0, 0);
-            Vector3 landing_spot = new Vector3(-3.5f + Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
-            landing_spot.y = 0;
-            new_shuttle.GetComponent<shuttle>().set_trajectory(transform.localPosition, landing_spot, 15, false);
-            new_shuttle.GetComponent<shuttle>().set_towards_left(true);
-
-            audio_manager.GetComponent<audio_manager>().PlayMany("launch");
+            launch_shuttle();
         }
+    }
+
+    void launch_shuttle()
+    {
+        GameObject new_shuttle = create_prefab("shuttle");
+        new_shuttle.transform.position = Vector3.zero;
+        new_shuttle.transform.SetParent(GameObject.Find("Game").transform.Find("shuttles"));
+
+        Vector3 landing_spot = new Vector3(-3.5f, 0, 0);
+        //Vector3 landing_spot = new Vector3(-3.5f + Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
+        landing_spot.y = 0;
+        new_shuttle.GetComponent<shuttle_behavior>().set_trajectory(transform.localPosition + Vector3.up, landing_spot, 15, false);
+        new_shuttle.GetComponent<shuttle_behavior>().set_towards_right(false);
+        new_shuttle.GetComponent<shuttle_behavior>().enabled = true;
+
+        audio_manager.GetComponent<audio_manager>().PlayMany("launch", 0.2f);
     }
 
     GameObject create_prefab(string name)

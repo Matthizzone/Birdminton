@@ -35,14 +35,14 @@ public class basic_enemy : MonoBehaviour
 
     void Update()
     {
-        to_me = shuttle.GetComponent<shuttle>().get_towards_left() ^ right_court;
+        to_me = shuttle.GetComponent<shuttle_behavior>().get_towards_right() ^ right_court;
         anim.SetBool("serving", false);
 
         // MOVE
         Vector3 foot_pos = transform.position;
         foot_pos.y = 0;
-        Vector3 target_pos = to_me ? shuttle.GetComponent<shuttle>().get_land_point() : new Vector3(right_court ? 2.4f : -2.4f, 0, 0);
-        target_pos = !shuttle.GetComponent<shuttle>().get_in_flight() && to_me ? new Vector3(right_court ? 2.4f : -2.4f, 0, 0) : target_pos; // go get the birdie
+        Vector3 target_pos = to_me ? shuttle.GetComponent<shuttle_behavior>().get_land_point() : new Vector3(right_court ? 2.4f : -2.4f, 0, 0);
+        target_pos = !shuttle.GetComponent<shuttle_behavior>().get_in_flight() && to_me ? new Vector3(right_court ? 2.4f : -2.4f, 0, 0) : target_pos; // go get the birdie
         
         
         Vector3 move_dir = target_pos - foot_pos;
@@ -81,13 +81,13 @@ public class basic_enemy : MonoBehaviour
         if (energy < 1) energy += Time.deltaTime * 0.1f;
 
         // hit birdie
-        if (to_me && shuttle.GetComponent<shuttle>().get_in_flight())
+        if (to_me && shuttle.GetComponent<shuttle_behavior>().get_in_flight())
         {
             if (Vector3.Distance(shuttle.transform.position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2)
             {
                 if (shuttle.transform.position.y > transform.Find("hitbox").position.y + 1.16f && energy >= 0.4f)
                 {
-                    hit_shuttle(new Vector3(-4, 0, Random.Range(-3, 3)), -8); // smash
+                    hit_shuttle(new Vector3(-4, 0, Random.Range(-3f, 3f)), -8); // smash
                     energy -= 0.4f;
                 }
                 else
@@ -103,8 +103,8 @@ public class basic_enemy : MonoBehaviour
             }
             
             //smash get
-            if (Vector3.Distance(shuttle.GetComponent<shuttle>().get_land_point(), transform.Find("hitbox").position) > transform.Find("hitbox").localScale.x
-                && shuttle.GetComponent<shuttle>().get_land_time() - Time.time < 0.5f && Time.time - prev_dash > 0.5f)
+            if (Vector3.Distance(shuttle.GetComponent<shuttle_behavior>().get_land_point(), transform.Find("hitbox").position) > transform.Find("hitbox").localScale.x
+                && shuttle.GetComponent<shuttle_behavior>().get_land_time() - Time.time < 0.5f && Time.time - prev_dash > 0.5f)
             {
                 anim.SetInteger("shot_type", swing_commit_type);
                 anim.SetTrigger("swing");
@@ -126,7 +126,7 @@ public class basic_enemy : MonoBehaviour
             float t_add = 0.2f;
 
             Vector3 future_hitbox_loc = hitbox.position + rb.velocity * t_add / 3;
-            Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle>().get_pos(Time.time + t_add);
+            Vector3 future_shuttle_loc = shuttle.GetComponent<shuttle_behavior>().get_pos(Time.time + t_add);
 
             if (Vector3.Distance(future_shuttle_loc, future_hitbox_loc) < 1.5f)
             {
@@ -154,11 +154,11 @@ public class basic_enemy : MonoBehaviour
 
     void hit_shuttle(Vector3 target_point, float v_y)
     {
-        if (shuttle.GetComponent<shuttle>().get_in_flight())
+        if (shuttle.GetComponent<shuttle_behavior>().get_in_flight())
         {
             if (shuttle.transform.position.y < 0) shuttle.transform.position = transform.position + Vector3.up;
-            shuttle.GetComponent<shuttle>().set_towards_left(right_court);
-            shuttle.GetComponent<shuttle>().set_trajectory(
+            shuttle.GetComponent<shuttle_behavior>().set_towards_right(right_court);
+            shuttle.GetComponent<shuttle_behavior>().set_trajectory(
                 shuttle.transform.position,
                 target_point * (right_court ? 1 : -1),
                 v_y,
@@ -174,8 +174,8 @@ public class basic_enemy : MonoBehaviour
     void hit_shuttle_random()
     {
         if (shuttle.transform.position.y < 0) shuttle.transform.position = transform.position + Vector3.up;
-        shuttle.GetComponent<shuttle>().set_towards_left(right_court);
-        shuttle.GetComponent<shuttle>().set_trajectory(
+        shuttle.GetComponent<shuttle_behavior>().set_towards_right(right_court);
+        shuttle.GetComponent<shuttle_behavior>().set_trajectory(
             shuttle.transform.position,
             new Vector3(Random.Range(-6f, -2f), 0, Random.Range(-3f, 3f)) * (right_court ? 1 : -1),
             15,

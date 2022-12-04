@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
-public class main_menu : MonoBehaviour
+public class menu_control : MonoBehaviour
 {
     // Temporaries
 
@@ -21,13 +19,10 @@ public class main_menu : MonoBehaviour
     // Global References
 
     audio_manager audio_manager;
-    public GameObject intro_story;
+    menu_controllable current_menu;
 
     // Internal System
-    int m = 0;
-    int num_choices = 0;
-    bool up = false;
-    bool down = false;
+    bool stick_out = false;
 
     private void Awake()
     {
@@ -38,7 +33,7 @@ public class main_menu : MonoBehaviour
         //input.Gameplay.X.performed += ctx => X();
         //input.Gameplay.Y.performed += ctx => Y();
 
-        //input.Gameplay.Start.performed += ctx => Start_down();
+        input.Gameplay.Start.performed += ctx => Start_down();
         //input.Gameplay.Select.performed += ctx => Select();
 
         input.Gameplay.LeftStickUp.performed += ctx => left_stick.y = ctx.ReadValue<float>();
@@ -77,68 +72,86 @@ public class main_menu : MonoBehaviour
     private void Start()
     {
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
-
-        num_choices = transform.Find("Choices").childCount;
+        current_menu = transform.Find("Main").GetComponent<menu_main>();
     }
 
     void Update()
     {
-        // set state variables
-        if (left_stick.y > 0.9f) // up
+        if (left_stick.magnitude > 0.9f)
         {
-            if (!up)
+            if (!stick_out)
             {
-                m--;
-                if (m < 0) m = num_choices - 1;
-                audio_manager.Play_SFX("menu_neutral");
-
-                up = true;
+                current_menu.MoveByVector(left_stick.normalized);
+                stick_out = true;
             }
         }
         else
         {
-            up = false;
-        }
-
-        if (left_stick.y < -0.9f) // down
-        {
-            if (!down)
-            {
-                m++;
-                if (m >= num_choices) m = 0;
-                audio_manager.Play_SFX("menu_neutral");
-
-                down = true;
-            }
-        }
-        else
-        {
-            down = false;
-        }
-
-
-
-
-        // appearance updates
-        for (int i = 0; i < num_choices; i++)
-        {
-            transform.Find("Choices").GetChild(i).GetChild(0).GetComponent<Image>().color =
-                new Color(0.5f, 0.7f, 0.8f, i == m ? 1 : 0);
+            stick_out = false;
         }
     }
 
     void A()
     {
+        menu_controllable next_menu = current_menu.A_Pressed();
+        if (next_menu != null) current_menu = next_menu;
+    }
+
+    void Start_down()
+    {
+        current_menu.Start_Pressed();
+    }
+
+
+
+
+
+
+    /*
+
+    void A()
+    {
         audio_manager.Play_SFX("menu_good");
-        enabled = false;
 
-        if (m == 0) // Story Mode
+        if (s == 0)
         {
-            GameObject IS = create_prefab("UI/IntroStory");
-            IS.transform.SetParent(transform.parent.Find("CutsceneUI"));
-            IS.transform.localPosition = Vector3.zero;
+            if (y == 0) // Story Mode
+            {
+                enabled = false;
+
+                GameObject IS = create_prefab("UI/IntroStory");
+                IS.transform.SetParent(transform.parent.Find("CutsceneUI"));
+                IS.transform.localPosition = Vector3.zero;
+
+                Destroy(gameObject);
+            }
+            else if (y == 1) // Exhibition
+            {
+                transform.Find("Screens").GetChild(s).gameObject.SetActive(false);
+                s++;
+                transform.Find("Screens").GetChild(s).gameObject.SetActive(true);
+            }
+            else if (y == 2) // Practice
+            {
+                enabled = false;
+
+                GameObject gym = create_prefab("Gym");
+                gym.transform.position = Vector3.zero;
+                gym.transform.Find("establishcam_pivot").gameObject.SetActive(false);
+
+                GameObject game = create_prefab("Game");
+                game.transform.position = Vector3.zero;
+                game.GetComponent<game_manager>().set_transitions(false);
+                game.transform.Find("game_cam").gameObject.SetActive(true);
+                game.transform.Find("Players").Find("launcher").gameObject.SetActive(true);
+                game.transform.Find("Players").Find("player").gameObject.SetActive(true);
+
+                transform.parent.Find("GameUI").gameObject.SetActive(true);
+
+                Destroy(gameObject);
+            }
         }
-        else if (m == 1) // Level 9 CPU
+        else if (s == 1)
         {
             GameObject gym = create_prefab("Gym");
             gym.transform.position = Vector3.zero;
@@ -146,42 +159,14 @@ public class main_menu : MonoBehaviour
 
             GameObject game = create_prefab("Game");
             game.transform.position = Vector3.zero;
+            game.GetComponent<game_manager>().set_transitions(true);
             game.transform.Find("game_cam").gameObject.SetActive(true);
             game.transform.Find("Players").Find("enemy_right").gameObject.SetActive(true);
             game.transform.Find("Players").Find("player").gameObject.SetActive(true);
+            game.transform.Find("Players").Find("player").GetComponent<marvin_behavior>().begin_serve();
 
             transform.parent.Find("GameUI").gameObject.SetActive(true);
         }
-        else if (m == 2) // Easy Serves
-        {
-            GameObject gym = create_prefab("Gym");
-            gym.transform.position = Vector3.zero;
-            gym.transform.Find("establishcam_pivot").gameObject.SetActive(false);
-
-            GameObject game = create_prefab("Game");
-            game.transform.position = Vector3.zero;
-            game.transform.Find("game_cam").gameObject.SetActive(true);
-            game.transform.Find("Players").Find("launcher").gameObject.SetActive(true);
-            game.transform.Find("Players").Find("player").gameObject.SetActive(true);
-
-            transform.parent.Find("GameUI").gameObject.SetActive(true);
-        }
-        else if (m == 3) // CPU against CPU
-        {
-            GameObject gym = create_prefab("Gym");
-            gym.transform.position = Vector3.zero;
-            gym.transform.Find("establishcam_pivot").gameObject.SetActive(false);
-
-            GameObject game = create_prefab("Game");
-            game.transform.position = Vector3.zero;
-            game.transform.Find("game_cam").gameObject.SetActive(true);
-            game.transform.Find("Players").Find("enemy_right").gameObject.SetActive(true);
-            game.transform.Find("Players").Find("enemy_left").gameObject.SetActive(true);
-
-            transform.parent.Find("GameUI").gameObject.SetActive(true);
-        }
-
-        Destroy(gameObject);
     }
 
     GameObject create_prefab(string name)
@@ -191,6 +176,7 @@ public class main_menu : MonoBehaviour
         newfab.name = name.Substring(start_index, name.Length - start_index);
         return newfab;
     }
+    */
 
     private void OnEnable()
     {

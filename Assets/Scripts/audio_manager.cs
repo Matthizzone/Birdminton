@@ -75,6 +75,11 @@ public class audio_manager : MonoBehaviour
 
     public void PlayMany(string clip_name)
     {
+        PlayMany(clip_name, 1);
+    }
+
+    public void PlayMany(string clip_name, float volume)
+    {
         AudioSource AS;
 
         try
@@ -90,6 +95,7 @@ public class audio_manager : MonoBehaviour
         GameObject mini_speaker = new GameObject();
         mini_speaker.AddComponent<AudioSource>();
         mini_speaker.GetComponent<AudioSource>().clip = AS.clip;
+        mini_speaker.GetComponent<AudioSource>().volume = volume;
         mini_speaker.GetComponent<AudioSource>().Play();
         mini_speaker.name = clip_name;
         mini_speaker.AddComponent<SFX_death>();

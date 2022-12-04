@@ -109,8 +109,8 @@ public class coach_1: MonoBehaviour
                 GameObject.Find("Players").transform.Find("enemy_right").gameObject.SetActive(false);
 
                 GameObject.Find("Players").transform.Find("player").gameObject.SetActive(true);
-                GameObject.Find("Players").transform.Find("player").GetComponent<player_controls>().enable_some(false, false, false, false, false, false);
-                GameObject.Find("Players").transform.Find("player").GetComponent<player_controls>().begin_serve();
+                GameObject.Find("Players").transform.Find("player").GetComponent<marvin_behavior>().enable_some(false, false, false, false, false, false);
+                GameObject.Find("Players").transform.Find("player").GetComponent<marvin_behavior>().begin_serve();
 
                 GameObject.Find("Players").transform.Find("hubert").gameObject.SetActive(true);
             }

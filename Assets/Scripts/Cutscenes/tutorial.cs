@@ -11,7 +11,7 @@ public class tutorial : MonoBehaviour
 {
     Input input;
     audio_manager audio_manager;
-    player_controls controls;
+    marvin_behavior controls;
     GameObject shuttle;
 
     public GameObject next_UI;
@@ -77,7 +77,7 @@ public class tutorial : MonoBehaviour
     {
         shuttle = GameObject.Find("shuttle");
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
-        controls = GameObject.Find("Players").transform.Find("player").GetComponent<player_controls>();
+        controls = GameObject.Find("Players").transform.Find("player").GetComponent<marvin_behavior>();
     }
 
     private void Update()
@@ -92,7 +92,7 @@ public class tutorial : MonoBehaviour
         {
             if (phase == 1) // hit B
             {
-                shuttle.GetComponent<shuttle>().set_towards_left(true);
+                shuttle.GetComponent<shuttle_behavior>().set_towards_right(true);
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, false, true, false, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
@@ -163,9 +163,9 @@ public class tutorial : MonoBehaviour
             else
                 transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/B");
 
-            if (!shuttle_was_hit && shuttle.GetComponent<shuttle>().get_in_flight()) shuttle_was_hit = true;
+            if (!shuttle_was_hit && shuttle.GetComponent<shuttle_behavior>().get_in_flight()) shuttle_was_hit = true;
 
-            if (shuttle_was_hit && !shuttle.GetComponent<shuttle>().get_in_flight())
+            if (shuttle_was_hit && !shuttle.GetComponent<shuttle_behavior>().get_in_flight())
             {
                 transform.Find("Dialogue").gameObject.SetActive(true);
                 controls.enable_some(false, false, false, false, false, false);
