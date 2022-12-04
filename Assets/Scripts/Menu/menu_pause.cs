@@ -107,7 +107,7 @@ public class menu_pause : menu_controllable
 
     public override void Start_Pressed()
     {
-        paused = true;
-        gameObject.SetActive(true);
+        paused = !paused;
+        gameObject.SetActive(paused);
     }
 }

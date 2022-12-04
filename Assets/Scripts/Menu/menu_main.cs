@@ -77,7 +77,12 @@ public class menu_main : menu_controllable
     {
         if (s == 0) // Story Mode
         {
-            print("A IS HERE DUMMY");
+            GameObject IS = create_prefab("UI/IntroStory");
+            IS.transform.SetParent(transform.parent.parent.Find("CutsceneUI"));
+            IS.transform.localPosition = Vector3.zero;
+
+            gameObject.SetActive(false);
+
             return null;
         }
         else if (s == 1) // Exhibition
@@ -91,8 +96,8 @@ public class menu_main : menu_controllable
         }
         else if (s == 2) // Practice
         {
-            print("A IS HERE DUMMY");
-            return null;
+            gameObject.SetActive(false);
+            return load_game("player", "launcher", false, s + 1);
         }
 
         return null;

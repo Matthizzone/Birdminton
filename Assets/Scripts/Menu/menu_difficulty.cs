@@ -137,23 +137,9 @@ public class menu_difficulty : menu_controllable
 
     public override menu_controllable A_Pressed()
     {
-        GameObject gym = create_prefab("Gym");
-        gym.transform.position = Vector3.zero;
-        gym.transform.Find("establishcam_pivot").gameObject.SetActive(false);
-
-        GameObject game = create_prefab("Game");
-        game.transform.position = Vector3.zero;
-        game.GetComponent<game_manager>().set_transitions(true);
-        game.transform.Find("game_cam").gameObject.SetActive(true);
-        game.transform.Find("Players").Find("enemy_right").gameObject.SetActive(true);
-        game.transform.Find("Players").Find("enemy_right").GetComponent<enemy_control>().set_level(s + 1);
-        game.transform.Find("Players").Find("player").gameObject.SetActive(true);
-        game.transform.Find("Players").Find("player").GetComponent<marvin_behavior>().begin_serve();
-
         gameObject.SetActive(false);
         transform.parent.Find("Exhibition").gameObject.SetActive(false);
-        transform.parent.parent.Find("GameUI").gameObject.SetActive(true);
 
-        return transform.parent.Find("Pause").GetComponent<menu_pause>();
+        return load_game("player", "enemy_right", true, s + 1);
     }
 }

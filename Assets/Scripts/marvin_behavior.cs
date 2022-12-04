@@ -229,8 +229,8 @@ public class marvin_behavior : MonoBehaviour
 
         if (!grounded) v_y -= 5; // bonus for jumping
 
-        shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.Find("model").localPosition, target_point, v_y, mishit);
         shuttle.GetComponent<shuttle_behavior>().set_towards_right(!right_court);
+        shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.Find("model").localPosition, target_point, v_y, mishit);
     }
 
     void Whiff()
@@ -404,8 +404,8 @@ public class marvin_behavior : MonoBehaviour
             shuttle.SetParent(GameObject.Find("Game").transform.Find("shuttles"));
             shuttle.transform.localPosition = Vector3.zero;
             shuttle.transform.localRotation = Quaternion.identity;
-            shuttle.GetComponent<shuttle_behavior>().set_trajectory(transform.localPosition + Vector3.up, target_point, v_y, false);
             shuttle.GetComponent<shuttle_behavior>().set_towards_right(!right_court);
+            shuttle.GetComponent<shuttle_behavior>().set_trajectory(transform.localPosition + Vector3.up, target_point, v_y, false);
 
             audio_manager.PlayMany("hit medium");
 

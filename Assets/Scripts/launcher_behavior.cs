@@ -33,8 +33,8 @@ public class launcher_behavior : MonoBehaviour
         Vector3 landing_spot = new Vector3(-3.5f, 0, 0);
         //Vector3 landing_spot = new Vector3(-3.5f + Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
         landing_spot.y = 0;
-        new_shuttle.GetComponent<shuttle_behavior>().set_trajectory(transform.localPosition + Vector3.up, landing_spot, 15, false);
         new_shuttle.GetComponent<shuttle_behavior>().set_towards_right(false);
+        new_shuttle.GetComponent<shuttle_behavior>().set_trajectory(transform.localPosition + Vector3.up, landing_spot, 15, false);
         new_shuttle.GetComponent<shuttle_behavior>().enabled = true;
 
         audio_manager.GetComponent<audio_manager>().PlayMany("launch", 0.2f);

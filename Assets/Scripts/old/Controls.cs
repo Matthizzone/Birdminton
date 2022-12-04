@@ -364,8 +364,8 @@ public class Controls : MonoBehaviour
                 if (v_y < 0) audio_manager.Play("hit hard");
                 else audio_manager.Play("hit medium");
             }
-            shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.transform.position, target_point, v_y, mishit);
             shuttle.GetComponent<shuttle_behavior>().set_towards_right(false);
+            shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.transform.position, target_point, v_y, mishit);
 
             // reset values
             mishit = false;

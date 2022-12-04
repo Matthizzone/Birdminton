@@ -8,13 +8,17 @@ public class game_manager : MonoBehaviour
     // Global References
 
     Transform game_ui;
+    audio_manager audio_manager;
+
+    Transform left_player;
+    Transform right_player;
 
     // Internal System
 
     int left_score = 0;
     int right_score = 0;
     float shuttle_death = Mathf.Infinity;
-    bool transitions = false; // in practice mode, score only, no transitions
+    bool real_game = false; // in practice mode, score only, no transitions
     bool mid_transition = false;
 
     // Parameters
@@ -24,12 +28,13 @@ public class game_manager : MonoBehaviour
 
     private void Start()
     {
+        audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         game_ui = GameObject.Find("UI").transform.Find("GameUI");
     }
 
     void Update()
     {
-        if (transitions)
+        if (real_game)
         {
             if (!mid_transition && Time.time - shuttle_death > dead_time)
             {
@@ -49,6 +54,12 @@ public class game_manager : MonoBehaviour
                 shuttle_death = Mathf.Infinity;
                 mid_transition = false;
             }
+
+            Transform shuttle = transform.Find("shuttles").Find("shuttle");
+            if (shuttle != null)
+            {
+                // uh
+            }
         }
     }
 
@@ -61,8 +72,32 @@ public class game_manager : MonoBehaviour
         game_ui.Find("Score").Find("Text").GetComponent<TMPro.TMP_Text>().text = left_score + " - " + right_score;
     }
 
-    public void set_transitions(bool new_transitions)
+    public void set_real_game(bool new_real_game)
     {
-        transitions = new_transitions;
+        real_game = new_real_game;
+    }
+
+    public void close_call()
+    {
+        if (real_game)
+        {
+            audio_manager.Play_SFX("crowd gasp");
+        }
+    }
+
+    public void set_players(Transform new_left, Transform new_right)
+    {
+        left_player = new_left;
+        right_player = new_right;
+    }
+
+    public Transform get_left_player()
+    {
+        return left_player;
+    }
+
+    public Transform get_right_player()
+    {
+        return right_player;
     }
 }

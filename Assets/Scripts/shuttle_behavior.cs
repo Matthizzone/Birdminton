@@ -116,7 +116,15 @@ public class shuttle_behavior : MonoBehaviour
         model.Find("firework").GetComponent<ParticleSystem>().Play();
 
         // camera update
-        GameObject.Find("Game").transform.Find("game_cam").GetComponent<camera_behavior>().set_landing_point(r_f);
+        Transform game = GameObject.Find("Game").transform;
+        game.Find("game_cam").GetComponent<camera_behavior>().set_landing_point(r_f);
+
+        // scary hit
+        if (Vector3.Distance(r_f, towards_right ? game.GetComponent<game_manager>().get_right_player().position :
+            game.GetComponent<game_manager>().get_left_player().position) > 6)
+        {
+            GameObject.Find("Game").GetComponent<game_manager>().close_call();
+        }
 
         // variables
         in_flight = true;
@@ -127,6 +135,7 @@ public class shuttle_behavior : MonoBehaviour
         model.GetComponent<TrailRenderer>().Clear();
         model.Find("mishit_line").gameObject.SetActive(mishit);
         model.Find("mishit_line").GetChild(0).gameObject.GetComponent<TrailRenderer>().Clear();
+
     }
 
     float get_radius(float t)

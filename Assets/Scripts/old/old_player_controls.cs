@@ -329,8 +329,8 @@ public class old_player_controls : MonoBehaviour
             shuttle.SetParent(GameObject.Find("Game").transform.Find("shuttles"));
             shuttle.transform.localPosition = Vector3.zero;
             shuttle.transform.localRotation = Quaternion.identity;
-            shuttle.GetComponent<shuttle_behavior>().set_trajectory(left_hand.position, target_point, v_y, false);
             shuttle.GetComponent<shuttle_behavior>().set_towards_right(false);
+            shuttle.GetComponent<shuttle_behavior>().set_trajectory(left_hand.position, target_point, v_y, false);
 
             audio_manager.PlayMany("hit medium");
 
@@ -413,8 +413,8 @@ public class old_player_controls : MonoBehaviour
             else audio_manager.PlayMany("hit medium");
         }
 
-        shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.Find("model").position, target_point, v_y, mishit);
         shuttle.GetComponent<shuttle_behavior>().set_towards_right(false);
+        shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.Find("model").position, target_point, v_y, mishit);
     }
 
     void Whiff()

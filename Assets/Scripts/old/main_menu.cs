@@ -198,7 +198,7 @@ public class main_menu : MonoBehaviour
 
                 GameObject game = create_prefab("Game");
                 game.transform.position = Vector3.zero;
-                game.GetComponent<game_manager>().set_transitions(false);
+                game.GetComponent<game_manager>().set_real_game(false);
                 game.transform.Find("game_cam").gameObject.SetActive(true);
                 game.transform.Find("Players").Find("launcher").gameObject.SetActive(true);
                 game.transform.Find("Players").Find("player").gameObject.SetActive(true);
@@ -216,7 +216,7 @@ public class main_menu : MonoBehaviour
 
             GameObject game = create_prefab("Game");
             game.transform.position = Vector3.zero;
-            game.GetComponent<game_manager>().set_transitions(true);
+            game.GetComponent<game_manager>().set_real_game(true);
             game.transform.Find("game_cam").gameObject.SetActive(true);
             game.transform.Find("Players").Find("enemy_right").gameObject.SetActive(true);
             game.transform.Find("Players").Find("player").gameObject.SetActive(true);

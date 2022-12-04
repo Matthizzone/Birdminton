@@ -90,12 +90,12 @@ public class player_controls : MonoBehaviour
         if (a_pressed_ago > 0)
         {
             a_pressed_ago--;
-            if (a_pressed_ago == 0) MB.TryHitShuttles(new Vector3(1, 0, left_stick.y * 3), 2); // drop
+            if (a_pressed_ago == 0) MB.TryHitShuttles(new Vector3(0.8f, 0, left_stick.y * 2.6f), 2); // drop
         }
         if (b_pressed_ago > 0)
         {
             b_pressed_ago--;
-            if (b_pressed_ago == 0) MB.TryHitShuttles(new Vector3(6, 0, left_stick.y * 3), 15); // clear
+            if (b_pressed_ago == 0) MB.TryHitShuttles(new Vector3(6.7f, 0, left_stick.y * 2.6f), 15); // clear
         }
     }
 
@@ -103,7 +103,7 @@ public class player_controls : MonoBehaviour
     {
         if (b_pressed_ago > 0)
         {
-            MB.TryHitShuttles(new Vector3(3.5f, 0, left_stick.y * 3), -5); // smash
+            MB.TryHitShuttles(new Vector3(3.5f, 0, left_stick.y * 2.6f), -5); // smash
             b_pressed_ago = 0;
         }
         else
@@ -114,7 +114,7 @@ public class player_controls : MonoBehaviour
     {
         if (a_pressed_ago > 0)
         {
-            MB.TryHitShuttles(new Vector3(3.5f, 0, left_stick.y * 3), -5); // smash
+            MB.TryHitShuttles(new Vector3(3.5f, 0, left_stick.y * 2.6f), -5); // smash
             a_pressed_ago = 0;
         }
         else
