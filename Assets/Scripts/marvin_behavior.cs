@@ -227,6 +227,8 @@ public class marvin_behavior : MonoBehaviour
             else audio_manager.PlayMany("hit medium");
         }
 
+        if (!grounded) v_y -= 5; // bonus for jumping
+
         shuttle.GetComponent<shuttle_behavior>().set_trajectory(shuttle.Find("model").localPosition, target_point, v_y, mishit);
         shuttle.GetComponent<shuttle_behavior>().set_towards_right(!right_court);
     }
@@ -422,9 +424,10 @@ public class marvin_behavior : MonoBehaviour
         // loop through all the shuttles and if any are in range, hit em
         foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
         {
-            // if 1) in range, 2) in flight, 3) towards my side
+            // if 1) in range, 2) in flight, 3) towards my side, 4) across the net
             if (Vector3.Distance(child.Find("model").position, transform.Find("hitbox").position) < transform.Find("hitbox").localScale.x / 2
-                && child.GetComponent<shuttle_behavior>().get_in_flight() && !(child.GetComponent<shuttle_behavior>().get_towards_right() ^ right_court))
+                && child.GetComponent<shuttle_behavior>().get_in_flight() && !(child.GetComponent<shuttle_behavior>().get_towards_right() ^ right_court)
+                && (right_court ? 1 : -1) * child.Find("model").position.x > 0)
             {
                 at_least_one = true;
                 if (v_y < 0) // it takes energy to hit it downwards, maximum is -20

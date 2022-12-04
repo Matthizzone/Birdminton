@@ -86,6 +86,8 @@ public class menu_pause : menu_controllable
                 transform.parent.Find("Main").gameObject.SetActive(true);
                 gameObject.SetActive(false);
 
+                paused = false;
+
                 return transform.parent.Find("Main").GetComponent<menu_main>();
             }
             else if (s == 1) // Exhibition
