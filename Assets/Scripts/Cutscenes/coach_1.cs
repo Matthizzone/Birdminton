@@ -96,6 +96,7 @@ public class coach_1: MonoBehaviour
             GameObject.Find("CircleMask").GetComponent<RectTransform>().sizeDelta = new Vector2(sizeDelt, sizeDelt);
             if (circle_change == 75)
             {
+                // load up hubert stuff
                 GameObject.Find("Gathering").transform.Find("cutscene_cam").gameObject.SetActive(false);
                 GameObject.Find("Game").transform.Find("game_cam").gameObject.SetActive(true);
                 GameObject.Find("UI").transform.Find("GameUI").gameObject.SetActive(true);

@@ -95,6 +95,7 @@ public class menu_control : MonoBehaviour
     {
         menu_controllable next_menu = current_menu.A_Pressed();
         if (next_menu != null) current_menu = next_menu;
+        else Destroy(gameObject); // Temporary solution for going to cutscenes
     }
 
     void Start_down()

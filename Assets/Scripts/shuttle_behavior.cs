@@ -120,7 +120,8 @@ public class shuttle_behavior : MonoBehaviour
         game.Find("game_cam").GetComponent<camera_behavior>().set_landing_point(r_f);
 
         // scary hit
-        if (Vector3.Distance(r_f, towards_right ? game.GetComponent<game_manager>().get_right_player().position :
+        if (game.GetComponent<game_manager>().get_real_game()
+            && Vector3.Distance(r_f, towards_right ? game.GetComponent<game_manager>().get_right_player().position :
             game.GetComponent<game_manager>().get_left_player().position) > 6)
         {
             GameObject.Find("Game").GetComponent<game_manager>().close_call();

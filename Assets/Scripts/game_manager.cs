@@ -77,6 +77,11 @@ public class game_manager : MonoBehaviour
         real_game = new_real_game;
     }
 
+    public bool get_real_game()
+    {
+        return real_game;
+    }
+
     public void close_call()
     {
         if (real_game)

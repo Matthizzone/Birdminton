@@ -35,28 +35,6 @@ public class menu_pause : menu_controllable
                     new_s = 2;
                 }
             }
-            else if (s == 1)
-            {
-                if (225 < angle && angle < 315) // down
-                {
-                    new_s = 2;
-                }
-                else if (45 < angle && angle < 135) // up
-                {
-                    new_s = 0;
-                }
-            }
-            else if (s == 2)
-            {
-                if (225 < angle && angle < 315) // down
-                {
-                    new_s = 0;
-                }
-                else if (45 < angle && angle < 135) // up
-                {
-                    new_s = 1;
-                }
-            }
 
 
             if (new_s > -1 && new_s != s)
@@ -77,7 +55,7 @@ public class menu_pause : menu_controllable
     {
         if (paused)
         {
-            if (s == 0) // Story Mode
+            if (s == 0) // Main Menu
             {
                 transform.parent.parent.Find("GameUI").gameObject.SetActive(false);
                 Destroy(GameObject.Find("Game"));
@@ -89,16 +67,6 @@ public class menu_pause : menu_controllable
                 paused = false;
 
                 return transform.parent.Find("Main").GetComponent<menu_main>();
-            }
-            else if (s == 1) // Exhibition
-            {
-                print("A IS HERE DUMMY");
-                return null;
-            }
-            else if (s == 2) // Practice
-            {
-                print("A IS HERE DUMMY");
-                return null;
             }
         }
 

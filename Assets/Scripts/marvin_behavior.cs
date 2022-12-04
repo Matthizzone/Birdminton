@@ -391,6 +391,11 @@ public class marvin_behavior : MonoBehaviour
 
     public void TryHitShuttles(Vector3 target_point, float v_y)
     {
+        // apply enabled checks
+        if (v_y < -4 && !smash_enabled) return;
+        if (v_y < 4 && !drop_enabled) return;
+        if (v_y > 10 && !clear_enabled) return;
+
         if (serving)
         {
             serving = false;

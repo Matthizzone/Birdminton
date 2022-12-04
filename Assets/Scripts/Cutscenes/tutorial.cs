@@ -12,7 +12,6 @@ public class tutorial : MonoBehaviour
     Input input;
     audio_manager audio_manager;
     marvin_behavior controls;
-    GameObject shuttle;
 
     public GameObject next_UI;
 
@@ -26,7 +25,6 @@ public class tutorial : MonoBehaviour
     int phase_frame_count = 0;
     bool a_enabled = false;
     int success_count;
-    bool shuttle_was_hit = false;
 
     private void Awake()
     {
@@ -75,7 +73,6 @@ public class tutorial : MonoBehaviour
 
     private void Start()
     {
-        shuttle = GameObject.Find("shuttle");
         audio_manager = GameObject.Find("audio_manager").GetComponent<audio_manager>();
         controls = GameObject.Find("Players").transform.Find("player").GetComponent<marvin_behavior>();
     }
@@ -92,7 +89,6 @@ public class tutorial : MonoBehaviour
         {
             if (phase == 1) // hit B
             {
-                shuttle.GetComponent<shuttle_behavior>().set_towards_right(true);
                 transform.Find("Dialogue").gameObject.SetActive(false);
                 controls.enable_some(false, false, false, true, false, false);
                 transform.Find("Controller").GetComponent<RawImage>().gameObject.SetActive(true);
@@ -163,9 +159,14 @@ public class tutorial : MonoBehaviour
             else
                 transform.Find("Controller").GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Controller/B");
 
-            if (!shuttle_was_hit && shuttle.GetComponent<shuttle_behavior>().get_in_flight()) shuttle_was_hit = true;
+            // count how many shuttles are on the ground
+            int count = 0;
+            foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+            {
+                if (child.Find("model").localPosition.y < 0.1f) count++;
+            }
 
-            if (shuttle_was_hit && !shuttle.GetComponent<shuttle_behavior>().get_in_flight())
+            if (count > 0)
             {
                 transform.Find("Dialogue").gameObject.SetActive(true);
                 controls.enable_some(false, false, false, false, false, false);
@@ -187,9 +188,14 @@ public class tutorial : MonoBehaviour
 
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
-                if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0) success_count++;
-                
-                if (success_count == 4) // you get one for free because of the first hit.
+                // count how many shuttles are on the ground, and on Hubert's side
+                int count = 0;
+                foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+                {
+                    if (child.Find("model").localPosition.y < 0.1f && child.Find("model").localPosition.x > 0) count++;
+                }
+
+                if (count >= 4) // cumulative
                 {
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
@@ -237,9 +243,14 @@ public class tutorial : MonoBehaviour
         {
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
-                if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0) success_count++;
-                
-                if (success_count == 4) // you get one for free because of the first hit.
+                // count how many shuttles are on the ground, and on Hubert's side
+                int count = 0;
+                foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+                {
+                    if (child.Find("model").localPosition.y < 0.1f && child.Find("model").localPosition.x > 0) count++;
+                }
+
+                if (count >= 7) // cumulative
                 {
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
@@ -274,9 +285,15 @@ public class tutorial : MonoBehaviour
 
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
-                if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0 && shuttle.transform.position.z > 0.5f) success_count++;
+                // count how many shuttles are on the ground, and on Hubert's side, and are at the top of his box
+                int count = 0;
+                foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+                {
+                    if (child.Find("model").localPosition.y < 0.1f && child.Find("model").localPosition.x > 0
+                        && child.Find("model").localPosition.z > 1.3f) count++;
+                }
 
-                if (success_count == 4) // you get one for free because of the first hit.
+                if (count >= 3)
                 {
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
@@ -301,9 +318,15 @@ public class tutorial : MonoBehaviour
 
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
-                if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0 && shuttle.transform.position.z < -0.5f) success_count++;
+                // count how many shuttles are on the ground, and on Hubert's side, and are at the bottom of his box
+                int count = 0;
+                foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+                {
+                    if (child.Find("model").localPosition.y < 0.1f && child.Find("model").localPosition.x > 0
+                        && child.Find("model").localPosition.z < -1.3f) count++;
+                }
 
-                if (success_count == 4) // you get one for free because of the first hit.
+                if (count >= 3) // you get one for free because of the first hit.
                 {
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
@@ -328,10 +351,14 @@ public class tutorial : MonoBehaviour
 
             if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
             {
+                // count how many shuttles are on the ground, and on Hubert's side
+                int count = 0;
+                foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+                {
+                    if (child.Find("model").localPosition.y < 0.1f && child.Find("model").localPosition.x > 0) count++;
+                }
 
-                if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0) success_count++;
-
-                if (success_count == 4) // you get one for free because of the first hit.
+                if (count >= 16) // cumulative
                 {
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
@@ -359,11 +386,16 @@ public class tutorial : MonoBehaviour
         }
         else if (phase == 20) // free play
         {
-            if (Mathf.RoundToInt(phase_frame_count % 220) == 0)
+            if (Mathf.RoundToInt(phase_frame_count % 20) == 0)
             {
-                if (shuttle.transform.position.y < 0.1f && shuttle.transform.position.x > 0) success_count++;
+                // count how many shuttles are on the ground, and on Hubert's side
+                int count = 0;
+                foreach (Transform child in GameObject.Find("Game").transform.Find("shuttles").transform)
+                {
+                    if (child.Find("model").localPosition.y < 0.1f && child.Find("model").localPosition.x > 0) count++;
+                }
 
-                if (success_count == 4) // you get one for free because of the first hit.
+                if (count >= 43)
                 {
                     phase++;
                     transform.Find("Dialogue").gameObject.SetActive(true);
